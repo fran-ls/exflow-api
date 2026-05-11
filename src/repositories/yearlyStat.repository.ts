@@ -1,0 +1,121 @@
+import { Prisma, TransactionType } from '../generated/prisma/client';
+import { prisma } from '../database/prisma';
+import { BaseRepository } from './base.repository';
+import {
+  IYearlyStat,
+  ICreateYearlyStat,
+  IUpdateYearlyStat,
+  IYearlyStatFilters,
+} from '../interfaces/yearlyStat.interface';
+
+export class YearlyStatRepository extends BaseRepository<
+  IYearlyStat,
+  ICreateYearlyStat,
+  IUpdateYearlyStat,
+  IYearlyStatFilters
+> {
+  async findOne(filters: Prisma.YearlyStatWhereInput): Promise<IYearlyStat | null> {
+    return prisma.yearlyStat.findFirst({
+      where: filters,
+      include: { user: false },
+    });
+  }
+
+  async findAll(): Promise<IYearlyStat[]> {
+    return prisma.yearlyStat.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { user: false },
+    });
+  }
+
+  async findWithFilters(
+    filters: IYearlyStatFilters
+  ): Promise<{ data: IYearlyStat[]; total: number }> {
+    const {
+      userId,
+      page = 1,
+      limit = 10,
+      orderBy = 'createdAt',
+      order = 'desc',
+    } = filters;
+
+    const where: Prisma.YearlyStatWhereInput = {}
+
+    if (userId) where.userId = userId;
+
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      prisma.yearlyStat.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { [orderBy]: order },
+      }),
+      prisma.yearlyStat.count({ where }),
+    ]);
+
+    return { data, total }
+  }
+
+  async findById(id: string): Promise<IYearlyStat | null> {
+    return prisma.yearlyStat.findUnique({
+      where: { id },
+      include: { user: false },
+    });
+  }
+
+  async findByUserId(userId: string): Promise<IYearlyStat[]> {
+    return prisma.yearlyStat.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async create(data: ICreateYearlyStat): Promise<IYearlyStat> {
+    return prisma.yearlyStat.create({
+      data,
+    });
+  }
+
+  async update(id: string, data: IUpdateYearlyStat): Promise<IYearlyStat> {
+    return prisma.yearlyStat.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async delete(id: string): Promise<IYearlyStat> {
+    return prisma.yearlyStat.delete({ where: { id } });
+  }
+
+  async updateBalance(year: number, amount: number, type: TransactionType): Promise<IYearlyStat> {
+    const stat = await prisma.yearlyStat.findUniqueOrThrow({ where: { year } });
+    const isIncome = type === 'INCOME';
+
+    return prisma.yearlyStat.update({
+      where: { year },
+      data: {
+        balance: isIncome ? stat.balance + amount : stat.balance - amount,
+        income: isIncome ? stat.income + amount : stat.income,
+        expense: !isIncome ? stat.expense + amount : stat.expense,
+        transactionCount: stat.transactionCount + 1
+      },
+    });
+  }
+
+  async revertBalance(year: number, amount: number, type: TransactionType): Promise<IYearlyStat> {
+    const stat = await prisma.yearlyStat.findUniqueOrThrow({ where: { year } });
+    const isIncome = type === 'INCOME';
+
+    return prisma.yearlyStat.update({
+      where: { year },
+      data: {
+        balance: isIncome ? stat.balance - amount : stat.balance + amount,
+        income: isIncome ? stat.income - amount : stat.income,
+        expense: !isIncome ? stat.expense - amount : stat.expense,
+        transactionCount: stat.transactionCount - 1
+      },
+    });
+  }
+}

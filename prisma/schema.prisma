@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  username     String
+  email        String
+  password     String
+  photoURL     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  dailyStats   DailyStat[]
+  monthlyStats MonthlyStat[]
+  yearlyStats  YearlyStat[]
+
+  @@map("users")
+}
+
+model Wallet {
+  id               String        @id @default(uuid())
+  name             String
+  type             WalletType
+  balance          Float         @default(0)
+  color            String
+  income           Float         @default(0)
+  expense          Float         @default(0)
+  initBalance      Float         @default(0)
+  incomeCount Int           @default(0)
+  expenseCount Int           @default(0)
+  userId           String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  transactions     Transaction[]
+
+  @@index([userId])
+  @@map("wallets")
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  title       String
+  amount      Float
+  description String?
+  type        TransactionType
+  date        DateTime
+  time        String
+  year        Int
+  month       Int
+  day         Int
+  userId      String
+  walletId    String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  wallet      Wallet          @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([walletId])
+  @@map("transactions")
+}
+
+model DailyStat {
+  id               String   @id @default(uuid())
+  day              String   @unique
+  date             DateTime
+  income           Float    @default(0)
+  expense          Float    @default(0)
+  balance          Float    @default(0)
+  incomeCount Int           @default(0)
+  expenseCount Int           @default(0)
+  userId           String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id])
+
+  @@index([day])
+  @@index([userId])
+  @@map("daily_stats")
+}
+
+model MonthlyStat {
+  id               String   @id @default(uuid())
+  month            String   @unique
+  income           Float    @default(0)
+  expense          Float    @default(0)
+  balance          Float    @default(0)
+  incomeCount Int           @default(0)
+  expenseCount Int           @default(0)
+  userId           String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id])
+
+  @@index([month])
+  @@index([userId])
+  @@map("monthly_stats")
+}
+
+model YearlyStat {
+  id               String   @id @default(uuid())
+  year             Int      @unique
+  income           Float    @default(0)
+  expense          Float    @default(0)
+  balance          Float    @default(0)
+  incomeCount Int           @default(0)
+  expenseCount Int           @default(0)
+  userId           String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id])
+
+  @@index([year])
+  @@index([userId])
+  @@map("yearly_stats")
+}
+
+enum WalletType {
+  CASH
+  BANK
+  CREDIT_CARD
+  SAVINGS
+  INVESTMENT
+  OTHER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
