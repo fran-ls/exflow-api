@@ -70,7 +70,8 @@ export class MonthlyStatService {
         balance: isIncome ? stat.balance + data.amount : stat.balance - data.amount,
         income: isIncome ? stat.income + data.amount : stat.income,
         expense: !isIncome ? stat.expense + data.amount : stat.expense,
-        transactionCount: stat.transactionCount + 1
+        incomeCount: isIncome ? stat.incomeCount + 1 : stat.incomeCount,
+        expenseCount: !isIncome ? stat.expenseCount + 1 : stat.expenseCount,
       });
     }
 
@@ -78,8 +79,9 @@ export class MonthlyStatService {
       month: data.month,
       income: isIncome ? data.amount : 0,
       expense: !isIncome ? data.amount : 0,
-      balance: data.amount,
-      transactionCount: 1,
+      balance: isIncome ? data.amount : -data.amount,
+      incomeCount: isIncome ? 1 : 0,
+      expenseCount: !isIncome ? 1 : 0,
       userId: data.userId,
     });
   }
@@ -92,7 +94,8 @@ export class MonthlyStatService {
       balance: isIncome ? stat.balance - amount : stat.balance + amount,
       income: isIncome ? stat.income - amount : stat.income,
       expense: !isIncome ? stat.expense - amount : stat.expense,
-      transactionCount: stat.transactionCount - 1
+      incomeCount: isIncome ? stat.incomeCount - 1 : stat.incomeCount,
+      expenseCount: !isIncome ? stat.expenseCount - 1 : stat.expenseCount,
     });
   }
 }

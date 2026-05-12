@@ -38,4 +38,14 @@ export class DashboardController {
       next(error);
     }
   }
+
+  // GET /totals
+  getTotals = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const summary = await this.dashboardService.getTotals();
+      ApiResponse.success(res, summary, 'Totals retrieved successfully', 200);
+    } catch (error) {
+      next(error);
+    }
+  }
 }

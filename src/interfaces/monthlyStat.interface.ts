@@ -6,7 +6,8 @@ export interface IMonthlyStat {
   income: number;
   expense: number;
   balance: number;
-  transactionCount: number;
+  incomeCount: number;
+  expenseCount: number;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -17,7 +18,8 @@ export interface ICreateMonthlyStat {
   income: number;
   expense: number;
   balance: number;
-  transactionCount: number;
+  incomeCount: number;
+  expenseCount: number;
   userId: string;
 }
 
@@ -26,7 +28,8 @@ export interface IUpdateMonthlyStat {
   income?: number;
   expense?: number;
   balance?: number;
-  transactionCount?: number;
+  incomeCount?: number;
+  expenseCount?: number;
 }
 
 export interface IUpdateBalance {
@@ -41,6 +44,6 @@ export interface IMonthlyStatFilters {
   userId?: string;
   page?: number;
   limit?: number;
-  orderBy?: 'month' | 'transactionCount' | 'createdAt';
+  orderBy?: 'month' | 'incomeCount' | 'expenseCount' | 'createdAt';
   order?: 'asc' | 'desc';
 }

@@ -111,7 +111,8 @@ export class WalletRepository extends BaseRepository<
         balance: isIncome ? wallet.balance + amount : wallet.balance - amount,
         income: isIncome ? wallet.income + amount : wallet.income,
         expense: !isIncome ? wallet.expense + amount : wallet.expense,
-        transactionCount: wallet.transactionCount + 1,
+        incomeCount: isIncome ? wallet.incomeCount + 1 : wallet.incomeCount,
+        expenseCount: !isIncome ? wallet.expenseCount + 1 : wallet.expenseCount,
       },
     });
   }
@@ -130,7 +131,8 @@ export class WalletRepository extends BaseRepository<
         balance: isIncome ? wallet.balance - amount : wallet.balance + amount,
         income: isIncome ? wallet.income - amount : wallet.income,
         expense: !isIncome ? wallet.expense - amount : wallet.expense,
-        transactionCount: wallet.transactionCount - 1,
+        incomeCount: isIncome ? wallet.incomeCount - 1 : wallet.incomeCount,
+        expenseCount: !isIncome ? wallet.expenseCount - 1 : wallet.expenseCount,
       },
     });
   }

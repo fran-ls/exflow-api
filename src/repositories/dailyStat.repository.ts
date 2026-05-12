@@ -101,7 +101,8 @@ export class DailyStatRepository extends BaseRepository<
         balance: isIncome ? stat.balance + amount : stat.balance - amount,
         income: isIncome ? stat.income + amount : stat.income,
         expense: !isIncome ? stat.expense + amount : stat.expense,
-        transactionCount: stat.transactionCount + 1
+        incomeCount: isIncome ? stat.incomeCount + 1 : stat.incomeCount,
+        expenseCount: !isIncome ? stat.expenseCount + 1 : stat.expenseCount,
       },
     });
   }
@@ -116,7 +117,8 @@ export class DailyStatRepository extends BaseRepository<
         balance: isIncome ? stat.balance - amount : stat.balance + amount,
         income: isIncome ? stat.income - amount : stat.income,
         expense: !isIncome ? stat.expense - amount : stat.expense,
-        transactionCount: stat.transactionCount - 1
+        incomeCount: isIncome ? stat.incomeCount - 1 : stat.incomeCount,
+        expenseCount: !isIncome ? stat.expenseCount - 1 : stat.expenseCount,
       },
     });
   }

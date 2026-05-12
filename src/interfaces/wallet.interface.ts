@@ -9,7 +9,8 @@ export interface IWallet {
   expense: number;
   income: number;
   initBalance: number;
-  transactionCount: number;
+  incomeCount: number;
+  expenseCount: number;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -23,7 +24,8 @@ export interface ICreateWallet {
   income?: number;
   expense?: number;
   initBalance: number;
-  transactionCount: number;
+  incomeCount: number;
+  expenseCount: number;
   userId: string;
 }
 
@@ -35,7 +37,8 @@ export interface IUpdateWallet {
   income?: number;
   expense?: number;
   initBalance?: number;
-  transactionCount?: number;
+  incomeCount?: number;
+  expenseCount?: number;
 }
 
 export interface IWalletFilters {
@@ -46,6 +49,6 @@ export interface IWalletFilters {
   maxBalance?: number;
   page?: number;
   limit?: number;
-  orderBy?: 'name' | 'balance' | 'transactionCount' | 'createdAt';
+  orderBy?: 'name' | 'balance' | 'incomeCount' | 'expenseCount' | 'createdAt';
   order?: 'asc' | 'desc';
 }

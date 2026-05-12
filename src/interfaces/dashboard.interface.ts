@@ -5,11 +5,20 @@ export interface DashboardStat {
   income: number;
   expense: number;
   balance: number;
-  transactionCount: number;
+  incomeCount: number;
+  expenseCount: number;
 }
 
 export interface TransactionByDay {
   day: string;
   items: Transaction[];
   meta: IPaginationMeta;
+  totals: Totals;
+}
+
+interface Totals {
+  income: number;
+  expense: number;
+  incomeCount: number;
+  expenseCount: number;
 }

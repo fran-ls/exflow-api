@@ -28,20 +28,20 @@ model User {
 }
 
 model Wallet {
-  id               String        @id @default(uuid())
-  name             String
-  type             WalletType
-  balance          Float         @default(0)
-  color            String
-  income           Float         @default(0)
-  expense          Float         @default(0)
-  initBalance      Float         @default(0)
-  incomeCount Int           @default(0)
+  id           String        @id @default(uuid())
+  name         String
+  type         WalletType
+  balance      Float         @default(0)
+  color        String
+  income       Float         @default(0)
+  expense      Float         @default(0)
+  initBalance  Float         @default(0)
+  incomeCount  Int           @default(0)
   expenseCount Int           @default(0)
-  userId           String
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  transactions     Transaction[]
+  userId       String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
 
   @@index([userId])
   @@map("wallets")
@@ -70,18 +70,18 @@ model Transaction {
 }
 
 model DailyStat {
-  id               String   @id @default(uuid())
-  day              String   @unique
-  date             DateTime
-  income           Float    @default(0)
-  expense          Float    @default(0)
-  balance          Float    @default(0)
-  incomeCount Int           @default(0)
-  expenseCount Int           @default(0)
-  userId           String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  user             User     @relation(fields: [userId], references: [id])
+  id           String   @id @default(uuid())
+  day          String   @unique
+  date         DateTime
+  income       Float    @default(0)
+  expense      Float    @default(0)
+  balance      Float    @default(0)
+  incomeCount  Int      @default(0)
+  expenseCount Int      @default(0)
+  userId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
 
   @@index([day])
   @@index([userId])
@@ -89,17 +89,17 @@ model DailyStat {
 }
 
 model MonthlyStat {
-  id               String   @id @default(uuid())
-  month            String   @unique
-  income           Float    @default(0)
-  expense          Float    @default(0)
-  balance          Float    @default(0)
-  incomeCount Int           @default(0)
-  expenseCount Int           @default(0)
-  userId           String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  user             User     @relation(fields: [userId], references: [id])
+  id           String   @id @default(uuid())
+  month        String   @unique
+  income       Float    @default(0)
+  expense      Float    @default(0)
+  balance      Float    @default(0)
+  incomeCount  Int      @default(0)
+  expenseCount Int      @default(0)
+  userId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
 
   @@index([month])
   @@index([userId])
@@ -107,17 +107,17 @@ model MonthlyStat {
 }
 
 model YearlyStat {
-  id               String   @id @default(uuid())
-  year             Int      @unique
-  income           Float    @default(0)
-  expense          Float    @default(0)
-  balance          Float    @default(0)
-  incomeCount Int           @default(0)
-  expenseCount Int           @default(0)
-  userId           String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  user             User     @relation(fields: [userId], references: [id])
+  id           String   @id @default(uuid())
+  year         Int      @unique
+  income       Float    @default(0)
+  expense      Float    @default(0)
+  balance      Float    @default(0)
+  incomeCount  Int      @default(0)
+  expenseCount Int      @default(0)
+  userId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
 
   @@index([year])
   @@index([userId])

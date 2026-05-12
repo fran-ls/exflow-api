@@ -25,10 +25,19 @@ export class DashboardService {
       const day = getFmtDate(date, 'yyyy-MM-dd');
       const transactions = await this.transactionService.getWithFilters({ date: day });
 
+      const statResult = await this.dailyStatService.getWithFilters({ day });
+      const stat = statResult.data?.[0];
+
       data.push({
         day,
         items: transactions.data,
         meta: transactions.meta,
+        totals: {
+          income: stat?.income || 0,
+          expense: stat?.expense || 0,
+          incomeCount: stat?.incomeCount || 0,
+          expenseCount: stat?.expenseCount || 0
+        }
       });
     }
 
@@ -40,7 +49,8 @@ export class DashboardService {
       income: 0,
       expense: 0,
       balance: 0,
-      transactionCount: 0,
+      incomeCount: 0,
+      expenseCount: 0
     }
 
     for (const date of this.last7Days) {
@@ -52,7 +62,8 @@ export class DashboardService {
       if (stat) {
         totals.income += stat.income;
         totals.expense += stat.expense;
-        totals.transactionCount += stat.transactionCount;
+        totals.incomeCount += stat.incomeCount;
+        totals.expenseCount += stat.expenseCount;
       }
     }
 
@@ -63,11 +74,20 @@ export class DashboardService {
 
   async getWallets(): Promise<Wallet[]> {
     const { data } = await this.walletService.getWithFilters({
-      // orderBy: 'transactionCount',
-      order: 'desc',
       limit: 5
     });
-    console.log(data)
-    return data;
+
+    return data.sort((a, b) => (
+      (b.incomeCount + b.expenseCount) - (a.incomeCount + a.expenseCount)
+    ));
+  }
+
+  async getTotals() {
+    const wallets = await this.walletService.getAll();
+
+    return {
+      balance: wallets.reduce((sum, w) => sum + w.balance, 0),
+      walletCount: wallets.length
+    }
   }
 }

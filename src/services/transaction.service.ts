@@ -131,7 +131,6 @@ export class TransactionService {
   async delete(id: string): Promise<Transaction | null> {
     const existing = await this.getById(id);
     const transaction = await this.transactionRepository.delete(id);
-
     const date = getFmtDate(transaction.date, '').split(' ')[0];
 
     await this.dailyStatService.revertBalance(

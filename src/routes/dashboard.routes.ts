@@ -13,4 +13,7 @@ router.get('/summary/weekly', dashboardController.getWeeklySummary);
 // GET /api/dashboard/wallets
 router.get('/wallets', dashboardController.getWallets);
 
+// GET /api/dashboard/totals
+router.get('/totals', dashboardController.getTotals);
+
 export default router;

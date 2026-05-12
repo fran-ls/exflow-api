@@ -7,7 +7,8 @@ export interface IDailyStat {
   income: number;
   expense: number;
   balance: number;
-  transactionCount: number;
+  incomeCount: number;
+  expenseCount: number;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -19,7 +20,8 @@ export interface ICreateDailyStat {
   income: number;
   expense: number;
   balance: number;
-  transactionCount: number;
+  incomeCount: number;
+  expenseCount: number;
   userId: string;
 }
 
@@ -29,7 +31,8 @@ export interface IUpdateDailyStat {
   income?: number;
   expense?: number;
   balance?: number;
-  transactionCount?: number;
+  incomeCount?: number;
+  expenseCount?: number;
 }
 
 export interface IUpdateBalance {
@@ -46,6 +49,6 @@ export interface IDailyStatFilters {
   userId?: string;
   page?: number;
   limit?: number;
-  orderBy?: 'day' | 'date' | 'transactionCount' | 'createdAt';
+  orderBy?: 'day' | 'date' | 'incomeCount' | 'expenseCount' | 'createdAt';
   order?: 'asc' | 'desc';
 }
