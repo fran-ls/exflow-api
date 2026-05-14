@@ -1,5 +1,4 @@
 import dotenv from 'dotenv'
-import { User } from '../generated/prisma/client';
 
 dotenv.config()
 
@@ -8,6 +7,12 @@ interface JWT_CONFIG {
   REFRESH_SECRET: string;
   ACCESS_EXPIRES_IN: string;
   REFRESH_EXPIRES_IN: string;
+}
+
+interface User {
+  username: string;
+  email: string;
+  password: string;
 }
 
 interface Envs {

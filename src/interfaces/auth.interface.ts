@@ -27,6 +27,7 @@ export interface IRegisterDto {
   password: string;
   username: string;
   photoURL?: string;
+  role?: Role;
 }
 
 export interface ILoginDto {

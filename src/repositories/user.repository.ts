@@ -37,7 +37,8 @@ export class UserRepository {
         email: data.email,
         password: data.password,
         username: data.username,
-        photoURL: ''
+        photoURL: data.photoURL,
+        role: data.role
       },
       omit: { password: true },
     });

@@ -1,5 +1,6 @@
 import { envs } from "../config/envs";
 import { UserRepository } from "../repositories/user.repository"
+import { HashUtil } from "./hash";
 
 export const saveUser = async () => {
   const repo = new UserRepository();
@@ -23,7 +24,14 @@ export const saveUser = async () => {
     data: null
   }
 
-  const data = await repo.create(user);
+  const hash = await HashUtil.hash(user.password);
+
+  const data = await repo.create({
+    ...user,
+    password: hash,
+    role: 'USER',
+  });
+
   console.log('✅ User saved...');
 
   return {
