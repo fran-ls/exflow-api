@@ -11,6 +11,10 @@ export class WalletService {
     this.walletRepository = new WalletRepository();
   }
 
+  async query(sql: string): Promise<Wallet[]> {
+    return this.walletRepository.execute(sql);
+  }
+
   async getAll(): Promise<Wallet[]> {
     return this.walletRepository.findAll();
   }
@@ -54,7 +58,38 @@ export class WalletService {
   }
 
   async delete(id: string): Promise<Wallet> {
-    await this.getById(id);
+    const { userId } = await this.getById(id);
+
+    // await this.query(`
+    //   UPDATE daily_stats SET
+    //     income = 0,
+    //     expense = 0,
+    //     balance = 0,
+    //     income_count = 0,
+    //     expense_count = 0
+    //   WHERE user_id = '${userId}'
+    // `);
+
+    // await this.query(`
+    //   UPDATE monthly_stats SET
+    //     income = 0,
+    //     expense = 0,
+    //     balance = 0,
+    //     income_count = 0,
+    //     expense_count = 0
+    //   WHERE user_id = '${userId}'
+    // `);
+
+    // await this.query(`
+    //   UPDATE yearly_stats SET
+    //     income = 0,
+    //     expense = 0,
+    //     balance = 0,
+    //     income_count = 0,
+    //     expense_count = 0
+    //   WHERE user_id = '${userId}'
+    // `);
+
     return this.walletRepository.delete(id);
   }
 }

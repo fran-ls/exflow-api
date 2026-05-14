@@ -30,10 +30,10 @@ export class DashboardController {
   }
 
   // GET /wallets
-  getWallets = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getFrequentWallets = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const summary = await this.dashboardService.getWallets();
-      ApiResponse.success(res, summary, 'Wallets retrieved successfully', 200);
+      const summary = await this.dashboardService.getFrequentWallets();
+      ApiResponse.success(res, summary, 'Frequent wallets retrieved successfully', 200);
     } catch (error) {
       next(error);
     }

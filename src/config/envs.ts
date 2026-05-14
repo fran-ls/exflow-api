@@ -3,12 +3,20 @@ import { User } from '../generated/prisma/client';
 
 dotenv.config()
 
+interface JWT_CONFIG {
+  ACCESS_SECRET: string;
+  REFRESH_SECRET: string;
+  ACCESS_EXPIRES_IN: string;
+  REFRESH_EXPIRES_IN: string;
+}
+
 interface Envs {
   NODE_ENV: string;
   PORT: number;
   DATABASE_URL: string;
   CORS_ORIGIN?: string;
-  USER?: User;
+  USER: User;
+  JWT_CONFIG: JWT_CONFIG;
 }
 
 const vars = [
@@ -26,10 +34,15 @@ for (const v of vars) {
   env[v] = intVars.includes(v) && environment[v] ? parseInt(environment[v]) : environment[v];
 }
 
-const k = 'USER';
+const jsonVars = [
+  'USER',
+  'JWT_CONFIG'
+];
 
-if (environment[k]) {
-  env[k] = JSON.parse(environment[k]);
+for (const v of jsonVars) {
+  if (environment[v]) {
+    env[v] = JSON.parse(environment[v]);
+  }
 }
 
 export const envs = env as Envs;

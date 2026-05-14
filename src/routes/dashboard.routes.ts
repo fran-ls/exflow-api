@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { DashboardController } from '../controllers/dashboard.controller';
+import { authenticate } from '../middlewares/authenticate';
 
 const router = Router();
 const dashboardController = new DashboardController();
+
+router.use(authenticate);
 
 // GET /api/dashboard/transactions
 router.get('/transactions', dashboardController.getWeeklyTransactions);
@@ -11,7 +14,7 @@ router.get('/transactions', dashboardController.getWeeklyTransactions);
 router.get('/summary/weekly', dashboardController.getWeeklySummary);
 
 // GET /api/dashboard/wallets
-router.get('/wallets', dashboardController.getWallets);
+router.get('/wallets', dashboardController.getFrequentWallets);
 
 // GET /api/dashboard/totals
 router.get('/totals', dashboardController.getTotals);

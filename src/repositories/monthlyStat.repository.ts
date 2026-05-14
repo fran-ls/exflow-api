@@ -1,27 +1,30 @@
-import { Prisma, TransactionType } from '../generated/prisma/client';
+import { MonthlyStat, Prisma, TransactionType } from '../generated/prisma/client';
 import { prisma } from '../database/prisma';
 import { BaseRepository } from './base.repository';
 import {
-  IMonthlyStat,
   ICreateMonthlyStat,
   IUpdateMonthlyStat,
   IMonthlyStatFilters,
 } from '../interfaces/monthlyStat.interface';
 
 export class MonthlyStatRepository extends BaseRepository<
-  IMonthlyStat,
+  MonthlyStat,
   ICreateMonthlyStat,
   IUpdateMonthlyStat,
   IMonthlyStatFilters
 > {
-  async findOne(filters: Prisma.MonthlyStatWhereInput): Promise<IMonthlyStat | null> {
+  async execute(query: string): Promise<MonthlyStat[]> {
+    return await prisma.$queryRawUnsafe(query);
+  }
+
+  async findOne(filters: Prisma.MonthlyStatWhereInput): Promise<MonthlyStat | null> {
     return prisma.monthlyStat.findFirst({
       where: filters,
       include: { user: false },
     });
   }
 
-  async findAll(): Promise<IMonthlyStat[]> {
+  async findAll(): Promise<MonthlyStat[]> {
     return prisma.monthlyStat.findMany({
       orderBy: { createdAt: 'desc' },
       include: { user: false },
@@ -30,7 +33,7 @@ export class MonthlyStatRepository extends BaseRepository<
 
   async findWithFilters(
     filters: IMonthlyStatFilters
-  ): Promise<{ data: IMonthlyStat[]; total: number }> {
+  ): Promise<{ data: MonthlyStat[]; total: number }> {
     const {
       month,
       userId,
@@ -60,38 +63,38 @@ export class MonthlyStatRepository extends BaseRepository<
     return { data, total }
   }
 
-  async findById(id: string): Promise<IMonthlyStat | null> {
+  async findById(id: string): Promise<MonthlyStat | null> {
     return prisma.monthlyStat.findUnique({
       where: { id },
       include: { user: false },
     });
   }
 
-  async findByUserId(userId: string): Promise<IMonthlyStat[]> {
+  async findByUserId(userId: string): Promise<MonthlyStat[]> {
     return prisma.monthlyStat.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async create(data: ICreateMonthlyStat): Promise<IMonthlyStat> {
+  async create(data: ICreateMonthlyStat): Promise<MonthlyStat> {
     return prisma.monthlyStat.create({
       data,
     });
   }
 
-  async update(id: string, data: IUpdateMonthlyStat): Promise<IMonthlyStat> {
+  async update(id: string, data: IUpdateMonthlyStat): Promise<MonthlyStat> {
     return prisma.monthlyStat.update({
       where: { id },
       data,
     });
   }
 
-  async delete(id: string): Promise<IMonthlyStat> {
+  async delete(id: string): Promise<MonthlyStat> {
     return prisma.monthlyStat.delete({ where: { id } });
   }
 
-  async updateBalance(month: string, amount: number, type: TransactionType): Promise<IMonthlyStat> {
+  async updateBalance(month: string, amount: number, type: TransactionType): Promise<MonthlyStat> {
     const stat = await prisma.monthlyStat.findUniqueOrThrow({ where: { month } });
     const isIncome = type === 'INCOME';
 
@@ -107,7 +110,7 @@ export class MonthlyStatRepository extends BaseRepository<
     });
   }
 
-  async revertBalance(month: string, amount: number, type: TransactionType): Promise<IMonthlyStat> {
+  async revertBalance(month: string, amount: number, type: TransactionType): Promise<MonthlyStat> {
     const stat = await prisma.monthlyStat.findUniqueOrThrow({ where: { month } });
     const isIncome = type === 'INCOME';
 

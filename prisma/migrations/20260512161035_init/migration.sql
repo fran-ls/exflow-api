@@ -10,9 +10,9 @@ CREATE TABLE "users" (
     "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "photoURL" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "photo_url" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -26,11 +26,12 @@ CREATE TABLE "wallets" (
     "color" TEXT NOT NULL,
     "income" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "expense" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "initBalance" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "transactionCount" INTEGER NOT NULL DEFAULT 0,
-    "userId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "init_balance" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "income_count" INTEGER NOT NULL DEFAULT 0,
+    "expense_count" INTEGER NOT NULL DEFAULT 0,
+    "user_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "wallets_pkey" PRIMARY KEY ("id")
 );
@@ -47,10 +48,10 @@ CREATE TABLE "transactions" (
     "year" INTEGER NOT NULL,
     "month" INTEGER NOT NULL,
     "day" INTEGER NOT NULL,
-    "userId" TEXT NOT NULL,
-    "walletId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "wallet_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "transactions_pkey" PRIMARY KEY ("id")
 );
@@ -63,10 +64,11 @@ CREATE TABLE "daily_stats" (
     "income" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "expense" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "balance" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "transactionCount" INTEGER NOT NULL,
-    "userId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "income_count" INTEGER NOT NULL DEFAULT 0,
+    "expense_count" INTEGER NOT NULL DEFAULT 0,
+    "user_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "daily_stats_pkey" PRIMARY KEY ("id")
 );
@@ -78,10 +80,11 @@ CREATE TABLE "monthly_stats" (
     "income" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "expense" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "balance" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "transactionCount" INTEGER NOT NULL DEFAULT 0,
-    "userId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "income_count" INTEGER NOT NULL DEFAULT 0,
+    "expense_count" INTEGER NOT NULL DEFAULT 0,
+    "user_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "monthly_stats_pkey" PRIMARY KEY ("id")
 );
@@ -93,22 +96,23 @@ CREATE TABLE "yearly_stats" (
     "income" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "expense" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "balance" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "transactionCount" INTEGER NOT NULL DEFAULT 0,
-    "userId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "income_count" INTEGER NOT NULL DEFAULT 0,
+    "expense_count" INTEGER NOT NULL DEFAULT 0,
+    "user_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "yearly_stats_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE INDEX "wallets_userId_idx" ON "wallets"("userId");
+CREATE INDEX "wallets_user_id_idx" ON "wallets"("user_id");
 
 -- CreateIndex
-CREATE INDEX "transactions_userId_idx" ON "transactions"("userId");
+CREATE INDEX "transactions_user_id_idx" ON "transactions"("user_id");
 
 -- CreateIndex
-CREATE INDEX "transactions_walletId_idx" ON "transactions"("walletId");
+CREATE INDEX "transactions_wallet_id_idx" ON "transactions"("wallet_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "daily_stats_day_key" ON "daily_stats"("day");
@@ -117,7 +121,7 @@ CREATE UNIQUE INDEX "daily_stats_day_key" ON "daily_stats"("day");
 CREATE INDEX "daily_stats_day_idx" ON "daily_stats"("day");
 
 -- CreateIndex
-CREATE INDEX "daily_stats_userId_idx" ON "daily_stats"("userId");
+CREATE INDEX "daily_stats_user_id_idx" ON "daily_stats"("user_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "monthly_stats_month_key" ON "monthly_stats"("month");
@@ -126,7 +130,7 @@ CREATE UNIQUE INDEX "monthly_stats_month_key" ON "monthly_stats"("month");
 CREATE INDEX "monthly_stats_month_idx" ON "monthly_stats"("month");
 
 -- CreateIndex
-CREATE INDEX "monthly_stats_userId_idx" ON "monthly_stats"("userId");
+CREATE INDEX "monthly_stats_user_id_idx" ON "monthly_stats"("user_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "yearly_stats_year_key" ON "yearly_stats"("year");
@@ -135,16 +139,16 @@ CREATE UNIQUE INDEX "yearly_stats_year_key" ON "yearly_stats"("year");
 CREATE INDEX "yearly_stats_year_idx" ON "yearly_stats"("year");
 
 -- CreateIndex
-CREATE INDEX "yearly_stats_userId_idx" ON "yearly_stats"("userId");
+CREATE INDEX "yearly_stats_user_id_idx" ON "yearly_stats"("user_id");
 
 -- AddForeignKey
-ALTER TABLE "transactions" ADD CONSTRAINT "transactions_walletId_fkey" FOREIGN KEY ("walletId") REFERENCES "wallets"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_wallet_id_fkey" FOREIGN KEY ("wallet_id") REFERENCES "wallets"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "daily_stats" ADD CONSTRAINT "daily_stats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "daily_stats" ADD CONSTRAINT "daily_stats_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "monthly_stats" ADD CONSTRAINT "monthly_stats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "monthly_stats" ADD CONSTRAINT "monthly_stats_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "yearly_stats" ADD CONSTRAINT "yearly_stats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "yearly_stats" ADD CONSTRAINT "yearly_stats_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

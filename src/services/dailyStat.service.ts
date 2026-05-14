@@ -11,6 +11,10 @@ export class DailyStatService {
     this.dailyStatRepository = new DailyStatRepository();
   }
 
+  async query(sql: string): Promise<DailyStat[]> {
+    return this.dailyStatRepository.execute(sql);
+  }
+
   async findOne(filters: Partial<IDailyStat>): Promise<DailyStat> {
     const stat = await this.dailyStatRepository.findOne(filters);
     if (!stat) throw new NotFoundError('DailyStat');

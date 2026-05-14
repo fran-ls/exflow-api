@@ -2,9 +2,12 @@ import { Router } from 'express';
 import { createYearlyStatValidation, updateYearlyStatValidation } from '../middlewares/yearlyStat.validation';
 import { YearlyStatController } from '../controllers/yearlyStat.controller';
 import { handleValidationErrors } from '../middlewares/validateRequest';
+import { authenticate } from '../middlewares/authenticate';
 
 const router = Router();
 const yearlyStatController = new YearlyStatController();
+
+router.use(authenticate);
 
 // GET /api/stats/yearly
 router.get('/', yearlyStatController.getAll);

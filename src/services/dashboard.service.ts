@@ -72,14 +72,15 @@ export class DashboardService {
     return totals;
   }
 
-  async getWallets(): Promise<Wallet[]> {
-    const { data } = await this.walletService.getWithFilters({
-      limit: 5
-    });
+  async getFrequentWallets(): Promise<Wallet[]> {
+    const wallets = await this.walletService.query(`
+      SELECT *, (income_count + expense_count) AS transaction_count
+      FROM "wallets"
+      ORDER BY transaction_count DESC
+      LIMIT 5
+    `);
 
-    return data.sort((a, b) => (
-      (b.incomeCount + b.expenseCount) - (a.incomeCount + a.expenseCount)
-    ));
+    return wallets.map(this.objToCamelCase);
   }
 
   async getTotals() {
@@ -89,5 +90,33 @@ export class DashboardService {
       balance: wallets.reduce((sum, w) => sum + w.balance, 0),
       walletCount: wallets.length
     }
+  }
+
+  objToCamelCase<T>(obj: { [key: string]: any }) {
+    const omitKeys = ['createdAt', 'created_at', 'updatedAt', 'updated_at']
+
+    function snakeToCamel(str: string) {
+      return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    }
+
+    function toCamel(obj: { [key: string]: any }): any {
+      const convert = () => {
+        return Object.keys(obj).reduce((acc, key) => {
+          const camelKey = snakeToCamel(key);
+          acc[camelKey] = !omitKeys.includes(key) ? toCamel(obj[key]) : obj[key];
+          return acc;
+        }, {} as any) as T;
+      }
+
+      if (Array.isArray(obj)) {
+        return obj.map(toCamel);
+      } else if (obj !== null && typeof obj === 'object') {
+        return convert();
+      }
+
+      return obj as T;
+    }
+
+    return toCamel(obj);
   }
 }

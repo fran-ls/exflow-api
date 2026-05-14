@@ -1,27 +1,30 @@
-import { Prisma, TransactionType } from '../generated/prisma/client';
+import { DailyStat, Prisma, TransactionType } from '../generated/prisma/client';
 import { prisma } from '../database/prisma';
 import { BaseRepository } from './base.repository';
 import {
-  IDailyStat,
   ICreateDailyStat,
   IUpdateDailyStat,
   IDailyStatFilters,
 } from '../interfaces/dailyStat.interface';
 
 export class DailyStatRepository extends BaseRepository<
-  IDailyStat,
+  DailyStat,
   ICreateDailyStat,
   IUpdateDailyStat,
   IDailyStatFilters
 > {
-  async findOne(filters: Prisma.DailyStatWhereInput): Promise<IDailyStat | null> {
+  async execute(query: string): Promise<DailyStat[]> {
+    return await prisma.$queryRawUnsafe(query);
+  }
+
+  async findOne(filters: Prisma.DailyStatWhereInput): Promise<DailyStat | null> {
     return prisma.dailyStat.findFirst({
       where: filters,
       include: { user: false },
     });
   }
 
-  async findAll(): Promise<IDailyStat[]> {
+  async findAll(): Promise<DailyStat[]> {
     return prisma.dailyStat.findMany({
       orderBy: { createdAt: 'desc' },
       include: { user: false },
@@ -30,7 +33,7 @@ export class DailyStatRepository extends BaseRepository<
 
   async findWithFilters(
     filters: IDailyStatFilters
-  ): Promise<{ data: IDailyStat[]; total: number }> {
+  ): Promise<{ data: DailyStat[]; total: number }> {
     const {
       day,
       userId,
@@ -60,38 +63,38 @@ export class DailyStatRepository extends BaseRepository<
     return { data, total }
   }
 
-  async findById(id: string): Promise<IDailyStat | null> {
+  async findById(id: string): Promise<DailyStat | null> {
     return prisma.dailyStat.findUnique({
       where: { id },
       include: { user: false },
     });
   }
 
-  async findByUserId(userId: string): Promise<IDailyStat[]> {
+  async findByUserId(userId: string): Promise<DailyStat[]> {
     return prisma.dailyStat.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async create(data: ICreateDailyStat): Promise<IDailyStat> {
+  async create(data: ICreateDailyStat): Promise<DailyStat> {
     return prisma.dailyStat.create({
       data,
     });
   }
 
-  async update(id: string, data: IUpdateDailyStat): Promise<IDailyStat> {
+  async update(id: string, data: IUpdateDailyStat): Promise<DailyStat> {
     return prisma.dailyStat.update({
       where: { id },
       data,
     });
   }
 
-  async delete(id: string): Promise<IDailyStat> {
+  async delete(id: string): Promise<DailyStat> {
     return prisma.dailyStat.delete({ where: { id } });
   }
 
-  async updateBalance(day: string, amount: number, type: TransactionType): Promise<IDailyStat> {
+  async updateBalance(day: string, amount: number, type: TransactionType): Promise<DailyStat> {
     const stat = await prisma.dailyStat.findUniqueOrThrow({ where: { day } });
     const isIncome = type === 'INCOME';
 
@@ -107,7 +110,7 @@ export class DailyStatRepository extends BaseRepository<
     });
   }
 
-  async revertBalance(day: string, amount: number, type: TransactionType): Promise<IDailyStat> {
+  async revertBalance(day: string, amount: number, type: TransactionType): Promise<DailyStat> {
     const stat = await prisma.dailyStat.findUniqueOrThrow({ where: { day } });
     const isIncome = type === 'INCOME';
 

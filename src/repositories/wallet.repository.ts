@@ -13,6 +13,10 @@ export class WalletRepository extends BaseRepository<
   IUpdateWallet,
   IWalletFilters
 > {
+  async execute(query: string): Promise<Wallet[]> {
+    return await prisma.$queryRawUnsafe(query);
+  }
+
   async findAll(): Promise<Wallet[]> {
     return prisma.wallet.findMany({
       orderBy: { createdAt: 'desc' },

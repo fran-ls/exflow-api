@@ -1,16 +1,21 @@
 import { Router } from 'express';
+import { Role } from '../generated/prisma/enums';
 import { WalletController } from '../controllers/wallet.controller';
 import {
   createWalletValidation,
   updateWalletValidation,
 } from '../middlewares/wallet.validation';
 import { handleValidationErrors } from '../middlewares/validateRequest';
+import { authenticate } from '../middlewares/authenticate';
+import { authorize } from '../middlewares/authorize';
 
 const router = Router();
 const walletController = new WalletController();
 
+router.use(authenticate);
+
 // GET /api/wallets
-router.get('/', walletController.getAll);
+router.get('/', authorize(Role.ADMIN), walletController.getAll);
 
 // GET /api/wallets/search
 router.get('/search', walletController.getWithFilters);

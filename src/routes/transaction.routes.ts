@@ -1,13 +1,18 @@
 import { Router } from 'express';
+import { Role } from '../generated/prisma/enums';
 import { TransactionController } from '../controllers/transaction.controller';
 import { createTransactionValidation, updateTransactionValidation } from '../middlewares/transaction.validation';
 import { handleValidationErrors } from '../middlewares/validateRequest';
+import { authenticate } from '../middlewares/authenticate';
+import { authorize } from '../middlewares/authorize';
 
 const router = Router();
 const transactionController = new TransactionController();
 
+router.use(authenticate);
+
 // GET /api/transactions
-router.get('/', transactionController.getAll);
+router.get('/', authorize(Role.ADMIN), transactionController.getAll);
 
 // GET /api/transactions/search
 router.get('/search', transactionController.getWithFilters);

@@ -5,7 +5,7 @@ import { WalletRepository } from '../repositories/wallet.repository';
 import { DailyStatService } from './dailyStat.service';
 import { MonthlyStatService } from './monthlyStat.service';
 import { YearlyStatService } from './yearlyStat.service';
-import { NotFoundError } from '../utils/appError';
+import { NotFoundError, ValidationError } from '../utils/appError';
 import { ApiResponse } from '../utils/apiResponse';
 import { getFmtDate } from '../utils/fmtDate';
 
@@ -71,6 +71,10 @@ export class TransactionService {
   async create(data: ICreateTransaction): Promise<Transaction> {
     const wallet = await this.walletRepository.findById(data.walletId);
     if (!wallet) throw new NotFoundError('Wallet');
+
+    if (data.type === 'EXPENSE' && data.amount > wallet.balance) {
+      throw new ValidationError("You don't have enough balance");
+    }
 
     const [year, month, day] = (data.date).split('-').map(Number);
     const date = new Date(`${data.date}T${data.time}`)

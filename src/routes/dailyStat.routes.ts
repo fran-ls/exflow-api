@@ -2,9 +2,12 @@ import { Router } from 'express';
 import { createDailyStatValidation, updateDailyStatValidation } from '../middlewares/dailyStat.validation';
 import { DailyStatController } from '../controllers/dailyStat.controller';
 import { handleValidationErrors } from '../middlewares/validateRequest';
+import { authenticate } from '../middlewares/authenticate';
 
 const router = Router();
 const dailyStatController = new DailyStatController();
+
+router.use(authenticate);
 
 // GET /api/stats/daily
 router.get('/', dailyStatController.getAll);

@@ -1,78 +1,89 @@
-import { Prisma, User } from '../generated/prisma/client';
 import { prisma } from '../database/prisma';
-import { BaseRepository } from './base.repository';
-import {
-  ICreateUser,
-  IUserFilters,
-} from '../interfaces/user.interface';
+import { Prisma, RefreshToken, User } from '../generated/prisma/client';
+import { IRegisterDto } from '../interfaces/auth.interface';
 
-export class UserRepository extends BaseRepository<
-  User,
-  ICreateUser,
-  Partial<ICreateUser>,
-  IUserFilters
-> {
-
+export class UserRepository {
   async findOne(filters: Prisma.UserWhereInput): Promise<User | null> {
     return prisma.user.findFirst({
       where: filters,
     });
   }
 
-  async findWithFilters(filters: IUserFilters): Promise<{ data: User[]; total: number; }> {
-    const {
-      username,
-      email,
-      page = 1,
-      limit = 10,
-      orderBy = 'createdAt',
-      order = 'desc',
-    } = filters;
-
-    const where: Prisma.UserWhereInput = {}
-
-    if (username) where.username = username;
-    if (email) where.email = email;
-
-    const skip = (page - 1) * limit;
-
-    const [data, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { [orderBy]: order },
-      }),
-      prisma.user.count({ where }),
-    ]);
-
-    return { data, total }
-  }
-
-  async findAll(): Promise<User[]> {
-    return []
+  async findAll(): Promise<Omit<User, 'password'>[]> {
+    return prisma.user.findMany({
+      omit: { password: true },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async findById(id: string): Promise<User | null> {
+    return prisma.user.findUnique({ where: { id } });
+  }
+
+  async findByIdPublic(id: string): Promise<Omit<User, 'password'> | null> {
     return prisma.user.findUnique({
       where: { id },
+      omit: { password: true },
     });
   }
 
-  async create(data: ICreateUser): Promise<User> {
+  async findByEmail(email: string): Promise<User | null> {
+    return prisma.user.findUnique({ where: { email } });
+  }
+
+  async create(data: IRegisterDto & { password: string }): Promise<Omit<User, 'password'>> {
     return prisma.user.create({
-      data: { ...data, photoURL: '' },
+      data: {
+        email: data.email,
+        password: data.password,
+        username: data.username,
+        photoURL: ''
+      },
+      omit: { password: true },
     });
   }
 
-  async update(id: string, data: Partial<ICreateUser>): Promise<User> {
+  async update(id: string, data: Partial<Pick<User, 'username' | 'email' | 'isActive' | 'role'>>): Promise<Omit<User, 'password'>> {
     return prisma.user.update({
       where: { id },
       data,
+      omit: { password: true },
     });
   }
 
-  async delete(id: string): Promise<User> {
-    return prisma.user.delete({ where: { id } });
+  async updatePassword(id: string, hashedPassword: string): Promise<void> {
+    await prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+    });
+  }
+
+  async delete(id: string): Promise<void> {
+    await prisma.user.delete({ where: { id } });
+  }
+
+  // --- Refresh Token methods ---
+  async saveRefreshToken(userId: string, token: string, expiresAt: Date): Promise<RefreshToken> {
+    return prisma.refreshToken.create({
+      data: { token, userId, expiresAt },
+    });
+  }
+
+  async findRefreshToken(token: string): Promise<RefreshToken | null> {
+    return prisma.refreshToken.findUnique({ where: { token } });
+  }
+
+  async deleteRefreshToken(token: string): Promise<void> {
+    await prisma.refreshToken.deleteMany({ where: { token } });
+  }
+
+  async deleteAllUserRefreshTokens(userId: string): Promise<void> {
+    await prisma.refreshToken.deleteMany({ where: { userId } });
+  }
+
+  async cleanExpiredTokens(): Promise<void> {
+    await prisma.refreshToken.deleteMany({
+      where: { expiresAt: { lt: new Date() } },
+    });
   }
 }
