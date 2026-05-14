@@ -20,10 +20,10 @@ export const createWalletValidation = [
     .withMessage('Initial balance is required')
     .isFloat({ min: 0 })
     .withMessage('Initial balance must be a positive number'),
-  body('userId')
-    .notEmpty()
-    .withMessage('userId is required')
-    .trim(),
+  // body('userId')
+  //   .notEmpty()
+  //   .withMessage('userId is required')
+  //   .trim(),
 ];
 
 export const updateWalletValidation = [

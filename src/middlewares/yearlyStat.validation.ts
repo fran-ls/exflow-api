@@ -5,10 +5,10 @@ export const createYearlyStatValidation = [
     .notEmpty()
     .withMessage('Year is required')
     .trim(),
-  body('userId')
-    .notEmpty()
-    .withMessage('userId is required')
-    .trim(),
+  // body('userId')
+  //   .notEmpty()
+  //   .withMessage('userId is required')
+  //   .trim(),
 ];
 
 export const updateYearlyStatValidation = [

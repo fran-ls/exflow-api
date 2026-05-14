@@ -98,6 +98,10 @@ export class TransactionController {
 
   // POST /transactions
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    if (req.user?.sub) {
+      req.body.userId = req.user.sub;
+    }
+
     try {
       const transaction = await this.transactionService.create(req.body);
       ApiResponse.created(res, transaction, 'Transaction created successfully');

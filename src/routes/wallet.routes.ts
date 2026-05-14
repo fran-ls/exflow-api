@@ -20,19 +20,19 @@ router.get('/', authorize(Role.ADMIN), walletController.getAll);
 // GET /api/wallets/search
 router.get('/search', walletController.getWithFilters);
 
+// POST /api/wallets/new
+router.post(
+  '/new',
+  createWalletValidation,
+  handleValidationErrors,
+  walletController.create
+);
+
 // GET /api/wallets/user/:userId
 router.get('/user/:userId', walletController.getByUserId);
 
 // GET /api/wallets/:id
 router.get('/:id', walletController.getById);
-
-// POST /api/wallets
-router.post(
-  '/',
-  createWalletValidation,
-  handleValidationErrors,
-  walletController.create
-);
 
 // PATCH /api/wallets/:id
 router.patch(

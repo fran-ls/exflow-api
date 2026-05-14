@@ -17,6 +17,14 @@ router.get('/', authorize(Role.ADMIN), transactionController.getAll);
 // GET /api/transactions/search
 router.get('/search', transactionController.getWithFilters);
 
+// POST /api/transactions
+router.post(
+  '/new',
+  createTransactionValidation,
+  handleValidationErrors,
+  transactionController.create
+);
+
 // GET /api/transactions/wallet/:walletId
 router.get('/wallet/:walletId', transactionController.getByWalletId);
 
@@ -28,14 +36,6 @@ router.get('/user/:userId', transactionController.getByUserId);
 
 // GET /api/transactions/:id
 router.get('/:id', transactionController.getById);
-
-// POST /api/transactions
-router.post(
-  '/',
-  createTransactionValidation,
-  handleValidationErrors,
-  transactionController.create
-);
 
 // PATCH /api/transactions/:id
 router.patch(

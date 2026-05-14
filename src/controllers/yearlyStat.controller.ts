@@ -61,6 +61,10 @@ export class YearlyStatController {
 
   // POST /stats/yearly
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    if (req.user?.sub) {
+      req.body.userId = req.user.sub;
+    }
+
     try {
       const stat = await this.yearlyStatService.create(req.body);
       ApiResponse.created(res, stat, 'Yearly stat created successfully');

@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -14,19 +9,20 @@ datasource db {
 
 model User {
   id            String         @id @default(uuid())
+  username      String
   email         String         @unique
   password      String
-  username      String
-  role          Role           @default(USER)
-  photoURL      String         @map("photo_url")
-  isActive      Boolean        @default(true)
+  photoURL      String?        @map("photo_url")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
-  refreshTokens RefreshToken[]
+  isActive      Boolean        @default(true) @map("is_active")
+  role          Role           @default(USER)
   dailyStats    DailyStat[]
   monthlyStats  MonthlyStat[]
-  yearlyStats   YearlyStat[]
+  refreshTokens RefreshToken[]
+  transactions  Transaction[]
   wallets       Wallet[]
+  yearlyStats   YearlyStat[]
 
   @@index([email])
   @@map("users")
@@ -36,9 +32,9 @@ model RefreshToken {
   id        String   @id @default(uuid())
   token     String   @unique
   userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("refresh_tokens")
@@ -80,6 +76,7 @@ model Transaction {
   walletId    String          @map("wallet_id")
   createdAt   DateTime        @default(now()) @map("created_at")
   updatedAt   DateTime        @updatedAt @map("updated_at")
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   wallet      Wallet          @relation(fields: [walletId], references: [id], onDelete: Cascade)
 
   @@index([userId])

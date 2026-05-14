@@ -65,6 +65,10 @@ export class WalletController {
 
   // POST /wallets
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    if (req.user?.sub) {
+      req.body.userId = req.user.sub;
+    }
+
     try {
       const wallet = await this.walletService.create(req.body);
       ApiResponse.created(res, wallet, 'Wallet created successfully');

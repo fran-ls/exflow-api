@@ -31,8 +31,8 @@ router.get('/:id', userController.getById);
 router.patch(
   '/:id',
   [
-    body('name').optional().notEmpty().trim(),
-    body('email').optional().isEmail().normalizeEmail(),
+    body('username').optional().notEmpty().trim(),
+    body('email').optional().isEmail(),//.normalizeEmail(),
   ],
   handleValidationErrors,
   userController.update
