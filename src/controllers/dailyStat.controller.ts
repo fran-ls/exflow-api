@@ -62,10 +62,6 @@ export class DailyStatController {
 
   // POST /stats/daily
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    if (req.user?.sub) {
-      req.body.userId = req.user.sub;
-    }
-
     try {
       const stat = await this.dailyStatService.create(req.body);
       ApiResponse.created(res, stat, 'Daily stat created successfully');

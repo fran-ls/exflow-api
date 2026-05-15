@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '../services/auth.service';
 import { ApiResponse } from '../utils/apiResponse';
+import { envs } from '../config/envs';
 
 export class AuthController {
   private readonly authService: AuthService;
@@ -13,7 +14,12 @@ export class AuthController {
   register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this.authService.register(req.body);
-      ApiResponse.created(res, result, 'User registered successfully');
+      this.setTokenCookie(res, result.tokens.refreshToken);
+
+      ApiResponse.created(res, {
+        user: result.user,
+        accessToken: result.tokens.accessToken
+      }, 'User registered successfully');
     } catch (error) {
       next(error);
     }
@@ -23,7 +29,13 @@ export class AuthController {
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this.authService.login(req.body);
-      ApiResponse.success(res, result, 'Login successful');
+      this.setTokenCookie(res, result.tokens.refreshToken);
+
+      // ApiResponse.success(res, result, 'Login successful');
+      ApiResponse.success(res, {
+        user: result.user,
+        accessToken: result.tokens.accessToken,
+      }, 'Login successful');
     } catch (error) {
       next(error);
     }
@@ -31,10 +43,13 @@ export class AuthController {
 
   // POST /auth/refresh
   refresh = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const refreshToken = req.cookies.refreshToken;
+
     try {
-      const { refreshToken } = req.body;
       const tokens = await this.authService.refresh(refreshToken);
-      ApiResponse.success(res, tokens, 'Tokens refreshed successfully');
+      this.setTokenCookie(res, tokens.refreshToken);
+
+      ApiResponse.success(res, { accessToken: tokens.accessToken }, 'Tokens refreshed successfully');
     } catch (error) {
       next(error);
     }
@@ -42,9 +57,11 @@ export class AuthController {
 
   // POST /auth/logout
   logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const refreshToken = req.cookies.refreshToken;
+
     try {
-      const { refreshToken } = req.body;
       await this.authService.logout(refreshToken);
+      res.clearCookie('refreshToken');
       ApiResponse.success(res, null, 'Logged out successfully');
     } catch (error) {
       next(error);
@@ -83,5 +100,24 @@ export class AuthController {
     } catch (error) {
       next(error);
     }
+  }
+
+  // POST /auth/encrypt-password
+  encryptPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const hash = await this.authService.encryptPassword(req.body.password);
+      ApiResponse.success(res, { hash }, 'Password encrypted successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  private setTokenCookie = (res: Response, value: string): void => {
+    res.cookie('refreshToken', value, {
+      httpOnly: true,
+      secure: envs.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
   }
 }

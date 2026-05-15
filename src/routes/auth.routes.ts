@@ -6,9 +6,11 @@ import { handleValidationErrors } from '../middlewares/validateRequest';
 import {
   registerValidation,
   loginValidation,
-  refreshValidation,
   changePasswordValidation,
 } from '../middlewares/auth.validation';
+import { body } from 'express-validator';
+import { authorize } from '../middlewares/authorize';
+import { Role } from '../generated/prisma/enums';
 
 const router = Router();
 const authController = new AuthController();
@@ -44,7 +46,7 @@ router.post(
 */
 router.post(
   '/refresh',
-  refreshValidation,
+  // refreshValidation,
   handleValidationErrors,
   authController.refresh
 );
@@ -56,7 +58,7 @@ router.post(
 */
 router.post(
   '/logout',
-  refreshValidation,
+  // refreshValidation,
   handleValidationErrors,
   authController.logout
 );
@@ -84,6 +86,25 @@ router.patch(
   changePasswordValidation,
   handleValidationErrors,
   authController.changePassword
+);
+
+/**
+ * @route  POST /api/auth/encrypt-password
+ * @access Private
+*/
+router.post(
+  '/encrypt-password',
+  authenticate,
+  authorize(Role.ADMIN),
+  [
+    body('password')
+      .notEmpty().withMessage('Password is required')
+      .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+      .matches(/[A-Z]/).withMessage('Must contain at least one uppercase letter')
+      .matches(/[0-9]/).withMessage('Must contain at least one number')
+  ],
+  handleValidationErrors,
+  authController.encryptPassword
 );
 
 export default router;

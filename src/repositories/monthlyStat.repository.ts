@@ -13,7 +13,7 @@ export class MonthlyStatRepository extends BaseRepository<
   IUpdateMonthlyStat,
   IMonthlyStatFilters
 > {
-  async execute(query: string): Promise<MonthlyStat[]> {
+  async execute(query: string): Promise<any> {
     return await prisma.$queryRawUnsafe(query);
   }
 

@@ -9,10 +9,10 @@ export const createDailyStatValidation = [
     .notEmpty()
     .withMessage('Date is required')
     .trim(),
-  // body('userId')
-  //   .notEmpty()
-  //   .withMessage('userId is required')
-  //   .trim(),
+  body('userId')
+    .notEmpty()
+    .withMessage('userId is required')
+    .trim(),
 ];
 
 export const updateDailyStatValidation = [

@@ -61,10 +61,6 @@ export class MonthlyStatController {
 
   // POST /stats/monthly
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    if (req.user?.sub) {
-      req.body.userId = req.user.sub;
-    }
-
     try {
       const stat = await this.monthlyStatService.create(req.body);
       ApiResponse.created(res, stat, 'Monthly stat created successfully');

@@ -13,8 +13,8 @@ export class WalletRepository extends BaseRepository<
   IUpdateWallet,
   IWalletFilters
 > {
-  async execute(query: string): Promise<Wallet[]> {
-    return await prisma.$queryRawUnsafe(query);
+  async execute<T = any>(query: string): Promise<T> {
+    return await prisma.$queryRawUnsafe<T>(query);
   }
 
   async findAll(): Promise<Wallet[]> {

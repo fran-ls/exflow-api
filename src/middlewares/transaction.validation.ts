@@ -25,10 +25,10 @@ export const createTransactionValidation = [
     .withMessage('Type is required')
     .isIn(['INCOME', 'EXPENSE'])
     .withMessage('Type must be INCOME or EXPENSE'),
-  // body('userId')
-  //   .notEmpty()
-  //   .withMessage('userId is required')
-  //   .trim(),
+  body('userId')
+    .notEmpty()
+    .withMessage('userId is required')
+    .trim(),
   body('walletId')
     .notEmpty()
     .withMessage('walletId is required')

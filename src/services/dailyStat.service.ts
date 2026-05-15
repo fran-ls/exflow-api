@@ -11,7 +11,7 @@ export class DailyStatService {
     this.dailyStatRepository = new DailyStatRepository();
   }
 
-  async query(sql: string): Promise<DailyStat[]> {
+  async query(sql: string): Promise<any> {
     return this.dailyStatRepository.execute(sql);
   }
 

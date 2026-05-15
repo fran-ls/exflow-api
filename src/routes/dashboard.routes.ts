@@ -10,6 +10,9 @@ router.use(authenticate);
 // GET /api/dashboard/transactions
 router.get('/transactions', dashboardController.getWeeklyTransactions);
 
+// GET /api/dashboard/summary/monthly
+router.get('/summary/monthly', dashboardController.getMonthlySummary);
+
 // GET /api/dashboard/summary/weekly
 router.get('/summary/weekly', dashboardController.getWeeklySummary);
 

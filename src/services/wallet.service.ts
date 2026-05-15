@@ -11,8 +11,8 @@ export class WalletService {
     this.walletRepository = new WalletRepository();
   }
 
-  async query(sql: string): Promise<Wallet[]> {
-    return this.walletRepository.execute(sql);
+  async query<T = any>(sql: string): Promise<T> {
+    return this.walletRepository.execute<T>(sql);
   }
 
   async getAll(): Promise<Wallet[]> {

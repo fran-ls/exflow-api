@@ -11,9 +11,33 @@ export class DashboardController {
 
   // GET /transactions
   getWeeklyTransactions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      ApiResponse.badRequest(res, 'userId is required');
+      return;
+    }
+
     try {
-      const summary = await this.dashboardService.getWeeklyTransactions();
+      const summary = await this.dashboardService.getWeeklyTransactions(userId);
       ApiResponse.success(res, summary, 'Weekly transactions retrieved successfully', 200);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET /summary/monthly
+  getMonthlySummary = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      ApiResponse.badRequest(res, 'userId is required');
+      return;
+    }
+
+    try {
+      const summary = await this.dashboardService.getMonthlySummary(userId);
+      ApiResponse.success(res, summary, 'Monthly summary retrieved successfully', 200);
     } catch (error) {
       next(error);
     }
@@ -21,8 +45,15 @@ export class DashboardController {
 
   // GET /summary/weekly
   getWeeklySummary = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      ApiResponse.badRequest(res, 'userId is required');
+      return;
+    }
+
     try {
-      const summary = await this.dashboardService.getWeeklySummary();
+      const summary = await this.dashboardService.getWeeklySummary(userId);
       ApiResponse.success(res, summary, 'Weekly summary retrieved successfully', 200);
     } catch (error) {
       next(error);
@@ -31,8 +62,15 @@ export class DashboardController {
 
   // GET /wallets
   getFrequentWallets = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      ApiResponse.badRequest(res, 'userId is required');
+      return;
+    }
+
     try {
-      const summary = await this.dashboardService.getFrequentWallets();
+      const summary = await this.dashboardService.getFrequentWallets(userId);
       ApiResponse.success(res, summary, 'Frequent wallets retrieved successfully', 200);
     } catch (error) {
       next(error);
@@ -41,8 +79,15 @@ export class DashboardController {
 
   // GET /totals
   getTotals = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user?.sub;
+
+    if (!userId) {
+      ApiResponse.badRequest(res, 'userId is required');
+      return;
+    }
+
     try {
-      const summary = await this.dashboardService.getTotals();
+      const summary = await this.dashboardService.getTotals(userId);
       ApiResponse.success(res, summary, 'Totals retrieved successfully', 200);
     } catch (error) {
       next(error);

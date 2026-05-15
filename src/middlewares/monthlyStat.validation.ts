@@ -5,10 +5,10 @@ export const createMonthlyStatValidation = [
     .notEmpty()
     .withMessage('Month is required')
     .trim(),
-  // body('userId')
-  //   .notEmpty()
-  //   .withMessage('userId is required')
-  //   .trim(),
+  body('userId')
+    .notEmpty()
+    .withMessage('userId is required')
+    .trim(),
 ];
 
 export const updateMonthlyStatValidation = [

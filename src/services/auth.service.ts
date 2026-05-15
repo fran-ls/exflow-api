@@ -48,7 +48,12 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string): Promise<IAuthTokens> {
+    if (!refreshToken) {
+      throw new UnauthorizedError('refreshToken is required');
+    }
+
     let payload;
+
     try {
       payload = JwtUtil.verifyRefreshToken(refreshToken);
     } catch {
@@ -65,10 +70,14 @@ export class AuthService {
 
     // Rotate refresh token
     await this.userRepository.deleteRefreshToken(refreshToken);
-    return this.generateAndSaveTokens(user);
+    return await this.generateAndSaveTokens(user);
   }
 
   async logout(refreshToken: string): Promise<void> {
+    if (!refreshToken) {
+      throw new UnauthorizedError('refreshToken is required');
+    }
+
     await this.userRepository.deleteRefreshToken(refreshToken);
   }
 
@@ -103,5 +112,9 @@ export class AuthService {
 
     await this.userRepository.saveRefreshToken(user.id, refreshToken, expiresAt);
     return { accessToken, refreshToken }
+  }
+
+  async encryptPassword(password: string): Promise<string> {
+    return await HashUtil.hash(password);
   }
 }

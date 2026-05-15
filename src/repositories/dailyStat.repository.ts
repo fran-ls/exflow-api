@@ -13,7 +13,7 @@ export class DailyStatRepository extends BaseRepository<
   IUpdateDailyStat,
   IDailyStatFilters
 > {
-  async execute(query: string): Promise<DailyStat[]> {
+  async execute(query: string): Promise<any> {
     return await prisma.$queryRawUnsafe(query);
   }
 
