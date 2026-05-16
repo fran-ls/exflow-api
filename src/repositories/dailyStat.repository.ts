@@ -36,6 +36,7 @@ export class DailyStatRepository extends BaseRepository<
   ): Promise<{ data: DailyStat[]; total: number }> {
     const {
       day,
+      date,
       userId,
       page = 1,
       limit = 10,
@@ -47,6 +48,7 @@ export class DailyStatRepository extends BaseRepository<
 
     if (userId) where.userId = userId;
     if (day) where.day = day;
+    if (date) where.date = date;
 
     const skip = (page - 1) * limit;
 
@@ -94,12 +96,14 @@ export class DailyStatRepository extends BaseRepository<
     return prisma.dailyStat.delete({ where: { id } });
   }
 
-  async updateBalance(day: string, amount: number, type: TransactionType): Promise<DailyStat> {
-    const stat = await prisma.dailyStat.findUniqueOrThrow({ where: { day } });
+  async updateBalance(userId: string, day: string, amount: number, type: TransactionType): Promise<DailyStat | null> {
+    const stat = await prisma.dailyStat.findFirst({ where: { userId, day } });
+    if (!stat) return null;
+
     const isIncome = type === 'INCOME';
 
     return prisma.dailyStat.update({
-      where: { day },
+      where: { id: stat.id },
       data: {
         balance: isIncome ? stat.balance + amount : stat.balance - amount,
         income: isIncome ? stat.income + amount : stat.income,
@@ -110,12 +114,14 @@ export class DailyStatRepository extends BaseRepository<
     });
   }
 
-  async revertBalance(day: string, amount: number, type: TransactionType): Promise<DailyStat> {
-    const stat = await prisma.dailyStat.findUniqueOrThrow({ where: { day } });
+  async revertBalance(userId: string, day: string, amount: number, type: TransactionType): Promise<DailyStat | null> {
+    const stat = await prisma.dailyStat.findFirst({ where: { userId, day } });
+    if (!stat) return null;
+
     const isIncome = type === 'INCOME';
 
     return prisma.dailyStat.update({
-      where: { day },
+      where: { id: stat.id },
       data: {
         balance: isIncome ? stat.balance - amount : stat.balance + amount,
         income: isIncome ? stat.income - amount : stat.income,

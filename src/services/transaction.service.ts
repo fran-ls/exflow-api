@@ -138,18 +138,21 @@ export class TransactionService {
     const date = getFmtDate(transaction.date, '').split(' ')[0];
 
     await this.dailyStatService.revertBalance(
+      existing.userId,
       date,
       transaction.amount,
       transaction.type
     );
 
     await this.monthlyStatService.revertBalance(
+      existing.userId,
       date.slice(0, 7),
       transaction.amount,
       transaction.type
     );
 
     await this.yearlyStatService.revertBalance(
+      existing.userId,
       parseInt(date.slice(0, 4)),
       transaction.amount,
       transaction.type

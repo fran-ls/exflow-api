@@ -87,7 +87,7 @@ model Transaction {
 
 model DailyStat {
   id           String   @id @default(uuid())
-  day          String   @unique
+  day          String
   date         DateTime
   income       Float    @default(0)
   expense      Float    @default(0)
@@ -99,14 +99,14 @@ model DailyStat {
   updatedAt    DateTime @updatedAt @map("updated_at")
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([day])
   @@index([userId])
+  @@index([userId, day])
   @@map("daily_stats")
 }
 
 model MonthlyStat {
   id           String   @id @default(uuid())
-  month        String   @unique
+  month        String
   income       Float    @default(0)
   expense      Float    @default(0)
   balance      Float    @default(0)
@@ -117,14 +117,14 @@ model MonthlyStat {
   updatedAt    DateTime @updatedAt @map("updated_at")
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([month])
   @@index([userId])
+  @@index([userId, month])
   @@map("monthly_stats")
 }
 
 model YearlyStat {
   id           String   @id @default(uuid())
-  year         Int      @unique
+  year         Int
   income       Float    @default(0)
   expense      Float    @default(0)
   balance      Float    @default(0)
@@ -135,8 +135,8 @@ model YearlyStat {
   updatedAt    DateTime @updatedAt @map("updated_at")
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([year])
   @@index([userId])
+  @@index([userId, year])
   @@map("yearly_stats")
 }
 

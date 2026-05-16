@@ -62,7 +62,9 @@ export class YearlyStatService {
   }
 
   async updateBalance(data: IUpdateBalance): Promise<YearlyStat> {
-    const stat = await this.yearlyStatRepository.findOne({ year: data.year });
+    const stat = await this.yearlyStatRepository.findOne({
+      userId: data.userId, year: data.year
+    });
     const isIncome = data.type === 'INCOME';
 
     if (stat) {
@@ -86,8 +88,10 @@ export class YearlyStatService {
     });
   }
 
-  async revertBalance(year: number, amount: number, type: TransactionType) {
-    const stat = await this.findOne({ year });
+  async revertBalance(userId: string, year: number, amount: number, type: TransactionType) {
+    const stat = await this.yearlyStatRepository.findOne({ userId, year });
+    if (!stat) return stat;
+
     const isIncome = type === 'INCOME';
 
     return await this.update(stat.id, {

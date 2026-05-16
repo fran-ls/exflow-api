@@ -66,7 +66,9 @@ export class DailyStatService {
   }
 
   async updateBalance(data: IUpdateBalance): Promise<DailyStat> {
-    const stat = await this.dailyStatRepository.findOne({ day: data.day });
+    const stat = await this.dailyStatRepository.findOne({
+      userId: data.userId, day: data.day
+    });
     const isIncome = data.type === 'INCOME';
 
     if (stat) {
@@ -91,8 +93,10 @@ export class DailyStatService {
     });
   }
 
-  async revertBalance(day: string, amount: number, type: TransactionType) {
-    const stat = await this.findOne({ day });
+  async revertBalance(userId: string, day: string, amount: number, type: TransactionType) {
+    const stat = await this.dailyStatRepository.findOne({ userId, day });
+    if (!stat) return stat;
+
     const isIncome = type === 'INCOME';
 
     return await this.update(stat.id, {

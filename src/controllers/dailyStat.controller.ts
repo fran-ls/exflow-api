@@ -25,7 +25,6 @@ export class DailyStatController {
     try {
       const filters: IDailyStatFilters = {
         day: req.query.day as string,
-        date: req.query.date as string,
         userId: req.query.userId as string,
         page: req.query.page ? Number(req.query.page) : 1,
         limit: req.query.limit ? Number(req.query.limit) : 10,

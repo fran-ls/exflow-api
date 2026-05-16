@@ -92,12 +92,14 @@ export class YearlyStatRepository extends BaseRepository<
     return prisma.yearlyStat.delete({ where: { id } });
   }
 
-  async updateBalance(year: number, amount: number, type: TransactionType): Promise<YearlyStat> {
-    const stat = await prisma.yearlyStat.findUniqueOrThrow({ where: { year } });
+  async updateBalance(userId: string, year: number, amount: number, type: TransactionType): Promise<YearlyStat | null> {
+    const stat = await prisma.yearlyStat.findFirst({ where: { userId, year } });
+    if (!stat) return null;
+
     const isIncome = type === 'INCOME';
 
     return prisma.yearlyStat.update({
-      where: { year },
+      where: { id: stat.id },
       data: {
         balance: isIncome ? stat.balance + amount : stat.balance - amount,
         income: isIncome ? stat.income + amount : stat.income,
@@ -108,12 +110,14 @@ export class YearlyStatRepository extends BaseRepository<
     });
   }
 
-  async revertBalance(year: number, amount: number, type: TransactionType): Promise<YearlyStat> {
-    const stat = await prisma.yearlyStat.findUniqueOrThrow({ where: { year } });
+  async revertBalance(userId: string, year: number, amount: number, type: TransactionType): Promise<YearlyStat | null> {
+    const stat = await prisma.yearlyStat.findFirst({ where: { userId, year } });
+    if (!stat) return null;
+
     const isIncome = type === 'INCOME';
 
     return prisma.yearlyStat.update({
-      where: { year },
+      where: { id: stat.id },
       data: {
         balance: isIncome ? stat.balance - amount : stat.balance + amount,
         income: isIncome ? stat.income - amount : stat.income,

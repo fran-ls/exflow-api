@@ -45,7 +45,7 @@ export interface IUpdateBalance {
 
 export interface IDailyStatFilters {
   day?: string;
-  date?: string;
+  date?: Date;
   userId?: string;
   page?: number;
   limit?: number;
