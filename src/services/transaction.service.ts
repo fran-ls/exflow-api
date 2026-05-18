@@ -1,7 +1,7 @@
 import { Transaction } from '../generated/prisma/client';
 import { ICreateTransaction, IUpdateTransaction, ITransactionFilters } from '../interfaces/transaction.interface';
 import { TransactionRepository } from '../repositories/transaction.repository';
-import { WalletRepository } from '../repositories/wallet.repository';
+import { WalletService } from './wallet.service';
 import { DailyStatService } from './dailyStat.service';
 import { MonthlyStatService } from './monthlyStat.service';
 import { YearlyStatService } from './yearlyStat.service';
@@ -11,7 +11,7 @@ import { getFmtDate } from '../utils/fmtDate';
 
 export class TransactionService {
   private readonly transactionRepository: TransactionRepository;
-  private readonly walletRepository: WalletRepository;
+  private readonly walletService: WalletService;
   private readonly dailyStatService: DailyStatService;
   private readonly monthlyStatService: MonthlyStatService;
   private readonly yearlyStatService: YearlyStatService;
@@ -21,7 +21,7 @@ export class TransactionService {
     this.dailyStatService = new DailyStatService();
     this.monthlyStatService = new MonthlyStatService();
     this.yearlyStatService = new YearlyStatService();
-    this.walletRepository = new WalletRepository();
+    this.walletService = new WalletService();
   }
 
   async getAll(): Promise<Transaction[]> {
@@ -53,7 +53,7 @@ export class TransactionService {
   }
 
   async getByWalletId(walletId: string): Promise<Transaction[]> {
-    const wallet = await this.walletRepository.findById(walletId);
+    const wallet = await this.walletService.getById(walletId);
     if (!wallet) throw new NotFoundError('Wallet');
     return this.transactionRepository.findByWalletId(walletId);
   }
@@ -63,13 +63,13 @@ export class TransactionService {
   }
 
   async getSummaryByWallet(walletId: string) {
-    const wallet = await this.walletRepository.findById(walletId);
+    const wallet = await this.walletService.getById(walletId);
     if (!wallet) throw new NotFoundError('Wallet');
     return this.transactionRepository.getSummaryByWallet(walletId);
   }
 
   async create(data: ICreateTransaction): Promise<Transaction> {
-    const wallet = await this.walletRepository.findById(data.walletId);
+    const wallet = await this.walletService.getById(data.walletId);
     if (!wallet) throw new NotFoundError('Wallet');
 
     if (data.type === 'EXPENSE' && data.amount > wallet.balance) {
@@ -105,7 +105,10 @@ export class TransactionService {
       userId: data.userId
     });
 
-    await this.walletRepository.updateBalance(data.walletId, data.amount, data.type);
+    await this.walletService.updateBalance(data.walletId, {
+      amount: data.amount,
+      type: data.type
+    });
 
     return transaction;
   }
@@ -118,15 +121,18 @@ export class TransactionService {
     const typeChanged = data.type !== undefined && data.type !== existing.type;
 
     if (amountChanged || typeChanged) {
-      await this.walletRepository.revertBalance(
-        existing.walletId,
-        existing.amount,
-        existing.type
-      );
+      await this.walletService.revertBalance(existing.walletId, {
+        amount: existing.amount,
+        type: existing.type
+      });
 
       const newType = data.type ?? existing.type;
       const newAmount = data.amount ?? existing.amount;
-      await this.walletRepository.updateBalance(existing.walletId, newAmount, newType);
+
+      await this.walletService.updateBalance(existing.walletId, {
+        amount: newAmount,
+        type: newType
+      });
     }
 
     return this.transactionRepository.update(id, data);
@@ -158,11 +164,10 @@ export class TransactionService {
       transaction.type
     );
 
-    await this.walletRepository.revertBalance(
-      existing.walletId,
-      existing.amount,
-      existing.type
-    );
+    await this.walletService.revertBalance(existing.walletId, {
+      amount: existing.amount,
+      type: existing.type
+    });
 
     return transaction;
   }

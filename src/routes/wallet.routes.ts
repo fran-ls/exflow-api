@@ -28,6 +28,15 @@ router.post(
   walletController.create
 );
 
+// GET /api/wallets/count
+router.get('/count', walletController.countWallets);
+
+// GET /api/wallets/stats
+router.get('/stats', walletController.getWalletStats);
+
+// GET /api/wallets/stats/balance
+router.get('/stats/balance', walletController.getTotalBalance);
+
 // GET /api/wallets/user/:userId
 router.get('/user/:userId', walletController.getByUserId);
 

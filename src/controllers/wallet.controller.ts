@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { WalletType } from '../generated/prisma/client';
-import { IWalletFilters } from '../interfaces/wallet.interface';
+import { IWalletFilters, IWalletSelect, IWalletStatFilters } from '../interfaces/wallet.interface';
 import { WalletService } from '../services/wallet.service';
 import { ApiResponse } from '../utils/apiResponse';
 
@@ -88,6 +88,48 @@ export class WalletController {
     try {
       const wallet = await this.walletService.delete(req.params.id);
       ApiResponse.success(res, wallet, 'Wallet deleted successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET /wallets/stats/balance
+  getTotalBalance = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.query.userId as string;
+
+    try {
+      const wallet = await this.walletService.getTotalBalance(userId);
+      ApiResponse.success(res, wallet, 'Wallet balance retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET /wallets/stats
+  getWalletStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const filters: IWalletStatFilters = {
+      id: req.query.walletId as string,
+      userId: req.query.userId as string,
+    }
+
+    try {
+      const wallet = await this.walletService.getWalletStats(filters);
+      ApiResponse.success(res, wallet, 'Wallet stats retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET /wallets/count
+  countWallets = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const filters: IWalletSelect = {
+      id: req.query.walletId as string,
+      userId: req.query.userId as string,
+    }
+
+    try {
+      const wallet = await this.walletService.countWallets(filters);
+      ApiResponse.success(res, wallet, 'Wallet count retrieved successfully');
     } catch (error) {
       next(error);
     }

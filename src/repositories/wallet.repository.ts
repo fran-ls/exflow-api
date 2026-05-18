@@ -5,6 +5,8 @@ import {
   ICreateWallet,
   IUpdateWallet,
   IWalletFilters,
+  IWalletSelect,
+  WallletStat,
 } from '../interfaces/wallet.interface';
 
 export class WalletRepository extends BaseRepository<
@@ -17,6 +19,25 @@ export class WalletRepository extends BaseRepository<
     return await prisma.$queryRawUnsafe<T>(query);
   }
 
+  async count(filters: Partial<IWalletSelect>): Promise<number> {
+    const data: any = await this.aggregate({
+      where: filters,
+      _count: {
+        _all: true,
+      }
+    });
+
+    return data._count?._all ?? 0;
+  }
+
+  private async aggregate(payload: Prisma.WalletAggregateArgs) {
+    return prisma.wallet.aggregate(payload);
+  }
+
+  async findUnique(filters: Prisma.WalletFindUniqueOrThrowArgs): Promise<Wallet | null> {
+    return prisma.wallet.findUnique(filters);
+  }
+
   async findAll(): Promise<Wallet[]> {
     return prisma.wallet.findMany({
       orderBy: { createdAt: 'desc' },
@@ -24,9 +45,7 @@ export class WalletRepository extends BaseRepository<
     });
   }
 
-  async findWithFilters(
-    filters: IWalletFilters
-  ): Promise<{ data: Wallet[]; total: number }> {
+  async findWithFilters(filters: IWalletFilters): Promise<{ data: Wallet[]; total: number }> {
     const {
       type,
       name,
@@ -101,43 +120,40 @@ export class WalletRepository extends BaseRepository<
     return prisma.wallet.delete({ where: { id } });
   }
 
-  async updateBalance(
-    id: string,
-    amount: number,
-    type: 'INCOME' | 'EXPENSE'
-  ): Promise<Wallet> {
-    const wallet = await prisma.wallet.findUniqueOrThrow({ where: { id } });
-    const isIncome = type === 'INCOME';
-
-    return prisma.wallet.update({
-      where: { id },
-      data: {
-        balance: isIncome ? wallet.balance + amount : wallet.balance - amount,
-        income: isIncome ? wallet.income + amount : wallet.income,
-        expense: !isIncome ? wallet.expense + amount : wallet.expense,
-        incomeCount: isIncome ? wallet.incomeCount + 1 : wallet.incomeCount,
-        expenseCount: !isIncome ? wallet.expenseCount + 1 : wallet.expenseCount,
-      },
+  async getTotalBalance(userId: string): Promise<number> {
+    const { _sum } = await this.aggregate({
+      where: { userId },
+      _sum: {
+        balance: true
+      }
     });
+
+    return _sum?.balance ?? 0;
   }
 
-  async revertBalance(
-    id: string,
-    amount: number,
-    type: 'INCOME' | 'EXPENSE'
-  ): Promise<Wallet> {
-    const wallet = await prisma.wallet.findUniqueOrThrow({ where: { id } });
-    const isIncome = type === 'INCOME';
+  async getWalletStats(filters: Prisma.WalletWhereInput): Promise<WallletStat> {
+    const where: Prisma.WalletWhereInput = {}
 
-    return prisma.wallet.update({
-      where: { id },
-      data: {
-        balance: isIncome ? wallet.balance - amount : wallet.balance + amount,
-        income: isIncome ? wallet.income - amount : wallet.income,
-        expense: !isIncome ? wallet.expense - amount : wallet.expense,
-        incomeCount: isIncome ? wallet.incomeCount - 1 : wallet.incomeCount,
-        expenseCount: !isIncome ? wallet.expenseCount - 1 : wallet.expenseCount,
-      },
+    if (filters.id) where.id = filters.id;
+    if (filters.userId) where.userId = filters.userId;
+
+    const { _sum } = await this.aggregate({
+      where,
+      _sum: {
+        balance: true,
+        income: true,
+        expense: true,
+        incomeCount: true,
+        expenseCount: true
+      }
     });
+
+    return {
+      balance: _sum?.balance ?? 0,
+      income: _sum?.income ?? 0,
+      expense: _sum?.expense ?? 0,
+      incomeCount: _sum?.incomeCount ?? 0,
+      expenseCount: _sum?.expenseCount ?? 0,
+    }
   }
 }

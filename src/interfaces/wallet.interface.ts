@@ -1,4 +1,4 @@
-import { WalletType } from '../generated/prisma/client';
+import { TransactionType, WalletType } from '../generated/prisma/client';
 
 export interface IWallet {
   id: string;
@@ -41,6 +41,11 @@ export interface IUpdateWallet {
   expenseCount?: number;
 }
 
+export interface IUpdateWalletBalance {
+  amount: number;
+  type: TransactionType;
+}
+
 export interface IWalletFilters {
   name?: string;
   type?: WalletType;
@@ -51,4 +56,22 @@ export interface IWalletFilters {
   limit?: number;
   orderBy?: 'name' | 'balance' | 'incomeCount' | 'expenseCount' | 'createdAt';
   order?: 'asc' | 'desc';
+}
+
+export interface IWalletSelect {
+  id?: string;
+  userId?: string;
+}
+
+export interface IWalletStatFilters {
+  id?: string;
+  userId?: string;
+}
+
+export interface WallletStat {
+  balance: number;
+  income: number;
+  expense: number;
+  incomeCount: number;
+  expenseCount: number;
 }

@@ -1,7 +1,7 @@
 import { Wallet } from '../generated/prisma/client';
-import { ICreateWallet, IUpdateWallet, IWalletFilters } from '../interfaces/wallet.interface';
+import { ICreateWallet, IUpdateWallet, IUpdateWalletBalance, IWallet, IWalletFilters, IWalletSelect, IWalletStatFilters } from '../interfaces/wallet.interface';
 import { WalletRepository } from '../repositories/wallet.repository';
-import { NotFoundError } from '../utils/appError';
+import { NotFoundError, ValidationError } from '../utils/appError';
 import { ApiResponse } from '../utils/apiResponse';
 
 export class WalletService {
@@ -13,6 +13,19 @@ export class WalletService {
 
   async query<T = any>(sql: string): Promise<T> {
     return this.walletRepository.execute<T>(sql);
+  }
+
+  async findUnique(filters: Partial<IWallet>): Promise<Wallet> {
+    const payload: any = {
+      where: filters,
+      // include: false,
+      // omit: { updatedAt: false },
+      // select: { name: true }
+    }
+
+    const wallet = await this.walletRepository.findUnique(payload);
+    if (!wallet) throw new NotFoundError('Wallet');
+    return wallet;
   }
 
   async getAll(): Promise<Wallet[]> {
@@ -91,5 +104,51 @@ export class WalletService {
     // `);
 
     return this.walletRepository.delete(id);
+  }
+
+  async updateBalance(id: string, { amount, type }: IUpdateWalletBalance): Promise<Wallet> {
+    const wallet = await this.findUnique({ id });
+    const isIncome = type === 'INCOME';
+
+    return await this.update(wallet.id, {
+      balance: isIncome ? wallet.balance + amount : wallet.balance - amount,
+      income: isIncome ? wallet.income + amount : wallet.income,
+      expense: !isIncome ? wallet.expense + amount : wallet.expense,
+      incomeCount: isIncome ? wallet.incomeCount + 1 : wallet.incomeCount,
+      expenseCount: !isIncome ? wallet.expenseCount + 1 : wallet.expenseCount,
+    });
+  }
+
+  async revertBalance(id: string, { amount, type }: IUpdateWalletBalance): Promise<Wallet> {
+    const wallet = await this.findUnique({ id });
+    const isIncome = type === 'INCOME';
+
+    return this.update(id, {
+      balance: isIncome ? wallet.balance - amount : wallet.balance + amount,
+      income: isIncome ? wallet.income - amount : wallet.income,
+      expense: !isIncome ? wallet.expense - amount : wallet.expense,
+      incomeCount: isIncome ? wallet.incomeCount - 1 : wallet.incomeCount,
+      expenseCount: !isIncome ? wallet.expenseCount - 1 : wallet.expenseCount,
+    });
+  }
+
+  async countWallets(filters: IWalletSelect) {
+    if (!filters.userId) {
+      throw new ValidationError('userId is required');
+    }
+
+    return await this.walletRepository.count(filters);
+  }
+
+  async getTotalBalance(userId: string) {
+    if (!userId) {
+      throw new ValidationError('userId is required');
+    }
+
+    return await this.walletRepository.getTotalBalance(userId);
+  }
+
+  async getWalletStats(filters: IWalletStatFilters) {
+    return await this.walletRepository.getWalletStats(filters);
   }
 }

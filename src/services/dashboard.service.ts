@@ -116,21 +116,12 @@ export class DashboardService {
   }
 
   async getTotals(userId: string) {
-    const [{ total_balance }] = await this.walletService.query<[{ total_balance: number }]>(`
-      SELECT SUM(balance) AS total_balance
-      FROM "wallets"
-      WHERE user_id = '${userId}'
-    `);
-
-    const [{ wallet_count }] = await this.walletService.query<[{ wallet_count: number }]>(`
-      SELECT COUNT(*) AS wallet_count
-      FROM "wallets"
-      WHERE user_id = '${userId}'
-    `);
+    const balance = await this.walletService.getTotalBalance(userId);
+    const count = await this.walletService.countWallets({ userId });
 
     return {
-      balance: total_balance,
-      walletCount: Number(wallet_count)
+      balance,
+      walletCount: count
     }
   }
 

@@ -1,4 +1,5 @@
 import { UserRepository } from '../repositories/user.repository';
+import { User } from '../generated/prisma/client';
 import {
   IRegisterDto,
   ILoginDto,
@@ -13,8 +14,8 @@ import {
   UnauthorizedError,
   NotFoundError,
   ForbiddenError,
+  ValidationError,
 } from '../utils/appError';
-import { User } from '../generated/prisma/client';
 
 export class AuthService {
   private readonly userRepository: UserRepository;
@@ -49,7 +50,7 @@ export class AuthService {
 
   async refresh(refreshToken: string): Promise<IAuthTokens> {
     if (!refreshToken) {
-      throw new UnauthorizedError('refreshToken is required');
+      throw new ValidationError('refreshToken is required');
     }
 
     let payload;
@@ -75,7 +76,7 @@ export class AuthService {
 
   async logout(refreshToken: string): Promise<void> {
     if (!refreshToken) {
-      throw new UnauthorizedError('refreshToken is required');
+      throw new ValidationError('refreshToken is required');
     }
 
     await this.userRepository.deleteRefreshToken(refreshToken);
