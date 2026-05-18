@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { TransactionType } from '../generated/prisma/client';
-import { ITransactionFilters } from '../interfaces/transaction.interface';
+import { ITransactionFilters, ITransactionSelect } from '../interfaces/transaction.interface';
 import { TransactionService } from '../services/transaction.service';
 import { ApiResponse } from '../utils/apiResponse';
 
@@ -32,6 +32,7 @@ export class TransactionController {
         walletId: req.query.walletId as string,
         type: req.query.type as TransactionType,
         title: req.query.title as string,
+        description: req.query.description as string,
         dateFrom: req.query.dateFrom as string,
         dateTo: req.query.dateTo as string,
         minAmount: req.query.minAmount ? Number(req.query.minAmount) : undefined,
@@ -121,6 +122,30 @@ export class TransactionController {
     try {
       const transaction = await this.transactionService.delete(req.params.id);
       ApiResponse.success(res, transaction, 'Transaction deleted successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // GET /transactions/count
+  countTransactions = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const date = req.query.date as string;
+
+    const filters: ITransactionSelect = {
+      userId: req.query.userId as string,
+      walletId: req.query.walletId as string,
+    }
+
+    if (date) {
+      const [year, month, day] = date.split('-');
+      filters.year = Number(year);
+      filters.month = Number(month);
+      filters.day = Number(day);
+    }
+
+    try {
+      const wallet = await this.transactionService.countTransactions(filters);
+      ApiResponse.success(res, wallet, 'Transaction count retrieved successfully');
     } catch (error) {
       next(error);
     }

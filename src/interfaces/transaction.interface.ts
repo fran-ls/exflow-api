@@ -40,6 +40,7 @@ export interface IUpdateTransaction {
 export interface ITransactionFilters {
   type?: TransactionType;
   title?: string;
+  description?: string;
   userId?: string;
   walletId?: string;
   date?: string;
@@ -54,4 +55,14 @@ export interface ITransactionFilters {
   limit?: number;
   orderBy?: 'date' | 'amount' | 'title' | 'createdAt';
   order?: 'asc' | 'desc';
+}
+
+export interface ITransactionSelect {
+  type?: TransactionType;
+  year?: number;
+  month?: number;
+  day?: number;
+  userId?: string;
+  walletId?: string;
+  createdAt?: Date;
 }

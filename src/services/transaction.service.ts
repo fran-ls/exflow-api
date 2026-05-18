@@ -1,5 +1,5 @@
 import { Transaction } from '../generated/prisma/client';
-import { ICreateTransaction, IUpdateTransaction, ITransactionFilters } from '../interfaces/transaction.interface';
+import { ICreateTransaction, IUpdateTransaction, ITransactionFilters, ITransactionSelect } from '../interfaces/transaction.interface';
 import { TransactionRepository } from '../repositories/transaction.repository';
 import { WalletService } from './wallet.service';
 import { DailyStatService } from './dailyStat.service';
@@ -170,5 +170,13 @@ export class TransactionService {
     });
 
     return transaction;
+  }
+
+  async countTransactions(filters: ITransactionSelect) {
+    if (!filters.userId) {
+      throw new ValidationError('userId is required');
+    }
+
+    return await this.transactionRepository.count(filters);
   }
 }

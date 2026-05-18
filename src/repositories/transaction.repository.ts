@@ -5,6 +5,7 @@ import {
   ICreateTransaction,
   IUpdateTransaction,
   ITransactionFilters,
+  ITransactionSelect,
 } from '../interfaces/transaction.interface';
 
 export class TransactionRepository extends BaseRepository<
@@ -13,6 +14,21 @@ export class TransactionRepository extends BaseRepository<
   IUpdateTransaction,
   ITransactionFilters
 > {
+  async count(filters: Partial<ITransactionSelect>): Promise<number> {
+    const data: any = await this.aggregate({
+      where: filters,
+      _count: {
+        _all: true,
+      }
+    });
+
+    return data._count?._all ?? 0;
+  }
+
+  private async aggregate(payload: Prisma.TransactionAggregateArgs) {
+    return prisma.transaction.aggregate(payload);
+  }
+
   async findAll(): Promise<Transaction[]> {
     return prisma.transaction.findMany({
       orderBy: { createdAt: 'desc' },
@@ -32,6 +48,7 @@ export class TransactionRepository extends BaseRepository<
       walletId,
       type,
       title,
+      description,
       date,
       dateFrom,
       dateTo,
@@ -49,6 +66,7 @@ export class TransactionRepository extends BaseRepository<
     if (walletId) where.walletId = walletId;
     if (type) where.type = type;
     if (title) where.title = { contains: title, mode: 'insensitive' }
+    if (description) where.description = { contains: description, mode: 'insensitive' }
     if (date) {
       const [year, month, day] = date.split('-').map(Number);
 

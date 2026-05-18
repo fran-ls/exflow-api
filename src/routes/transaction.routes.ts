@@ -17,6 +17,9 @@ router.get('/', authorize(Role.ADMIN), transactionController.getAll);
 // GET /api/transactions/search
 router.get('/search', transactionController.getWithFilters);
 
+// GET /api/transactions/count
+router.get('/count', transactionController.countTransactions);
+
 // POST /api/transactions
 router.post(
   '/new',
