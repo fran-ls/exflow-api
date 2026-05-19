@@ -33,6 +33,7 @@ export class TransactionController {
         type: req.query.type as TransactionType,
         title: req.query.title as string,
         description: req.query.description as string,
+        date: req.query.date as string,
         dateFrom: req.query.dateFrom as string,
         dateTo: req.query.dateTo as string,
         minAmount: req.query.minAmount ? Number(req.query.minAmount) : undefined,
@@ -97,7 +98,7 @@ export class TransactionController {
     }
   }
 
-  // POST /transactions
+  // POST /transactions/new
   create = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const transaction = await this.transactionService.create(req.body);
