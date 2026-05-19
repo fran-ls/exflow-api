@@ -46,9 +46,6 @@ export interface ITransactionFilters {
   date?: string;
   dateFrom?: string;
   dateTo?: string;
-  // year?: number;
-  // month?: number;
-  // day?: number;
   minAmount?: number;
   maxAmount?: number;
   page?: number;

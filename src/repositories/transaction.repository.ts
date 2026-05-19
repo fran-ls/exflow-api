@@ -65,8 +65,13 @@ export class TransactionRepository extends BaseRepository<
     if (userId) where.userId = userId;
     if (walletId) where.walletId = walletId;
     if (type) where.type = type;
-    if (title) where.title = { contains: title, mode: 'insensitive' }
-    if (description) where.description = { contains: description, mode: 'insensitive' }
+    if (title || description) {
+      where.OR = [
+        { title: { contains: title, mode: 'insensitive' } },
+        { description: { contains: description, mode: 'insensitive' } }
+      ]
+    }
+
     if (date) {
       const [year, month, day] = date.split('-').map(Number);
 

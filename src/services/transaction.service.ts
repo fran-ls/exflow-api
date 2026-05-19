@@ -33,6 +33,10 @@ export class TransactionService {
     total: number;
     meta: ReturnType<typeof ApiResponse.buildPaginationMeta>;
   }> {
+    if (!filters.userId) {
+      throw new ValidationError('userId is required');
+    }
+
     const page = Number(filters.page) || 1;
     const limit = Number(filters.limit) || 10;
 
