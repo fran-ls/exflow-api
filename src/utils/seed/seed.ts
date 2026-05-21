@@ -1,6 +1,6 @@
-import { WalletType, TransactionType, Role } from '../generated/prisma/client';
-import { prisma } from '../database/prisma';
-import { HashUtil } from './hash';
+import { Role, TransactionType, WalletType } from '../../generated/prisma/enums';
+import { prisma } from '../../database/prisma';
+import { HashUtil } from '../hash';
 
 async function main() {
   console.log('🌱 Seeding database...');
