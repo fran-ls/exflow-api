@@ -13,10 +13,10 @@ model User {
   email         String         @unique
   password      String
   photoURL      String?        @map("photo_url")
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
   isActive      Boolean        @default(true) @map("is_active")
   role          Role           @default(USER)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
   dailyStats    DailyStat[]
   monthlyStats  MonthlyStat[]
   refreshTokens RefreshToken[]
@@ -31,10 +31,10 @@ model User {
 model RefreshToken {
   id        String   @id @default(uuid())
   token     String   @unique
-  revoked   Boolean  @default(false)
   userId    String   @map("user_id")
-  expiresAt DateTime @map("expires_at")
+  revoked   Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime @map("expires_at")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
