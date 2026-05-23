@@ -1,6 +1,9 @@
 .env.local
 .env
 
+backup
+extra
+
 node_modules
 dist
 
