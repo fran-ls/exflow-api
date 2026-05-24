@@ -81,6 +81,21 @@ export class AuthController {
     }
   }
 
+  /**
+   * POST /auth/logout-all/email
+   * Revokes all sessions for the authenticated user
+  */
+  logoutAllByEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const email = req.body.email;
+
+    try {
+      await this.authService.logoutAllByEmail(email);
+      ApiResponse.success(res, null, 'All sessions revoked');
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // GET /auth/me
   getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

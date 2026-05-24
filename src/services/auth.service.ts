@@ -40,6 +40,8 @@ export class AuthService {
     if (!user) throw new UnauthorizedError('Invalid credentials');
     if (!user.isActive) throw new ForbiddenError('Account is disabled');
 
+    await this.logoutAll(user.id);
+
     const passwordMatch = await HashUtil.compare(dto.password, user.password);
     if (!passwordMatch) throw new UnauthorizedError('Invalid credentials');
 
@@ -84,6 +86,18 @@ export class AuthService {
 
   async logoutAll(userId: string): Promise<void> {
     await this.userRepository.deleteAllUserRefreshTokens(userId);
+  }
+
+  async logoutAllByEmail(email: string): Promise<void> {
+    if (!email) {
+      throw new ValidationError('email is required');
+    }
+
+    const user = await this.userRepository.findByEmail(email);
+
+    if (user) {
+      await this.logoutAll(user.id);
+    }
   }
 
   async getProfile(userId: string): Promise<IUserPublic> {

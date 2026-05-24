@@ -73,6 +73,12 @@ router.post(
 router.post('/logout-all', authenticate, authController.logoutAll);
 
 /**
+ * @route  POST /api/auth/logout-all/email
+ * @desc   Revoke ALL refresh tokens for the current user
+*/
+router.post('/logout-all/email', authController.logoutAllByEmail);
+
+/**
  * @route  GET /api/auth/me
  * @access Private
 */
