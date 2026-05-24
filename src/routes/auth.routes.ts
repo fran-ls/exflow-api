@@ -17,10 +17,12 @@ const authController = new AuthController();
 
 /**
  * @route  POST /api/auth/register
- * @access Public
+ * @access Private
 */
 router.post(
   '/register',
+  authenticate,
+  authorize(Role.ADMIN),
   authRateLimiter,
   registerValidation,
   handleValidationErrors,

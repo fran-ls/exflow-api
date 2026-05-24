@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Wallet & Transaction REST API with Node.js + TypeScript + Prisma",
   "main": "dist/index.js",
+  "engines": {
+    "node": "22.22.2"
+  },
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "prisma generate && tsc",
