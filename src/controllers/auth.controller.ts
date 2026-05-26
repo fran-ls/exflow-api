@@ -3,6 +3,8 @@ import { AuthService } from '../services/auth.service';
 import { ApiResponse } from '../utils/apiResponse';
 import { envs } from '../config/envs';
 
+const NODE_ENV = envs.NODE_ENV.toLowerCase();
+
 export class AuthController {
   private readonly authService: AuthService;
 
@@ -128,10 +130,12 @@ export class AuthController {
   }
 
   private setTokenCookie = (res: Response, value: string): void => {
+    const isProd = NODE_ENV === 'production' || NODE_ENV === 'prod';
+
     res.cookie('refreshToken', value, {
       httpOnly: true,
-      secure: envs.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
   }
