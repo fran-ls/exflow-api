@@ -40,8 +40,6 @@ export class AuthService {
     if (!user) throw new UnauthorizedError('Invalid credentials');
     if (!user.isActive) throw new ForbiddenError('Account is disabled');
 
-    await this.logoutAll(user.id);
-
     const passwordMatch = await HashUtil.compare(dto.password, user.password);
     if (!passwordMatch) throw new UnauthorizedError('Invalid credentials');
 
@@ -52,7 +50,7 @@ export class AuthService {
 
   async refresh(refreshToken: string): Promise<IAuthTokens> {
     if (!refreshToken) {
-      throw new ValidationError('refreshToken is required');
+      throw new UnauthorizedError('Invalid or expired refresh token');
     }
 
     let payload;
@@ -78,7 +76,7 @@ export class AuthService {
 
   async logout(refreshToken: string): Promise<void> {
     if (!refreshToken) {
-      throw new ValidationError('refreshToken is required');
+      throw new UnauthorizedError('Invalid or expired refresh token');
     }
 
     await this.userRepository.deleteRefreshToken(refreshToken);
