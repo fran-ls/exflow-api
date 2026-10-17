@@ -44,8 +44,8 @@ export interface ITransactionFilters {
   userId?: string;
   walletId?: string;
   date?: string;
-  dateFrom?: string;
-  dateTo?: string;
+  dateFrom?: string | Date;
+  dateTo?: string | Date;
   minAmount?: number;
   maxAmount?: number;
   page?: number;

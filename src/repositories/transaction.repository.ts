@@ -41,7 +41,8 @@ export class TransactionRepository extends BaseRepository<
   }
 
   async findWithFilters(
-    filters: ITransactionFilters
+    filters: ITransactionFilters,
+    paginated = true
   ): Promise<{ data: Transaction[]; total: number }> {
     const {
       userId,
@@ -83,8 +84,8 @@ export class TransactionRepository extends BaseRepository<
     }
     if (dateFrom || dateTo) {
       where.date = {}
-      if (dateFrom) (where.date as Prisma.StringFilter).gte = dateFrom;
-      if (dateTo) (where.date as Prisma.StringFilter).lte = dateTo;
+      if (dateFrom) (where.date as Prisma.StringFilter).gte = dateFrom as string;
+      if (dateTo) (where.date as Prisma.StringFilter).lt = dateTo as string;
     }
     if (minAmount !== undefined || maxAmount !== undefined) {
       where.amount = {}
@@ -97,8 +98,10 @@ export class TransactionRepository extends BaseRepository<
     const [data, total] = await Promise.all([
       prisma.transaction.findMany({
         where,
-        skip,
-        take: limit,
+        ...(paginated && {
+          skip,
+          take: limit,
+        }),
         orderBy: { [orderBy]: order },
         include: {
           wallet: {

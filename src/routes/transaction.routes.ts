@@ -20,6 +20,9 @@ router.get('/search', transactionController.getWithFilters);
 // GET /api/transactions/count
 router.get('/count', transactionController.countTransactions);
 
+// GET /api/transactions/count
+router.get('/year/summary', transactionController.getYearSummary);
+
 // POST /api/transactions
 router.post(
   '/new',

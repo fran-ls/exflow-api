@@ -2,13 +2,45 @@ import { Request, Response, NextFunction } from 'express';
 import { TransactionType } from '../generated/prisma/client';
 import { ITransactionFilters, ITransactionSelect } from '../interfaces/transaction.interface';
 import { TransactionService } from '../services/transaction.service';
+import { AnalyticService } from '../services/analytic.service';
 import { ApiResponse } from '../utils/apiResponse';
 
 export class TransactionController {
   private readonly transactionService: TransactionService;
+  private readonly analyticService: AnalyticService;
 
   constructor() {
     this.transactionService = new TransactionService();
+    this.analyticService = new AnalyticService();
+  }
+
+  getYearSummary = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const filters: ITransactionFilters = {
+        userId: req.query.userId as string,
+        walletId: req.query.walletId as string,
+        type: req.query.type as any,
+        date: req.query.date as string,
+        dateFrom: req.query.dateFrom as string,
+        dateTo: req.query.dateTo as string,
+        orderBy: req.query.orderBy as ITransactionFilters['orderBy'],
+        order: req.query.order as ITransactionFilters['order'],
+      }
+
+      if (filters.dateFrom) {
+        const [year, month, day] = (filters.dateFrom as string).split('-').map(Number);
+        filters.dateFrom = new Date(year, month - 1, day);
+      }
+      if (filters.dateTo) {
+        const [year, month, day] = (filters.dateTo as string).split('-').map(Number);
+        filters.dateTo = new Date(year, month - 1, day);
+      }
+
+      const summary = await this.analyticService.getYearSummary(filters);
+      ApiResponse.success(res, summary, 'Year summary retrieved successfully', 200);
+    } catch (error) {
+      next(error);
+    }
   }
 
   // GET /transactions

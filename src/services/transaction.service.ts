@@ -28,7 +28,7 @@ export class TransactionService {
     return this.transactionRepository.findAll();
   }
 
-  async getWithFilters(filters: ITransactionFilters): Promise<{
+  async getWithFilters(filters: ITransactionFilters, paginated = true): Promise<{
     data: Transaction[];
     total: number;
     meta: ReturnType<typeof ApiResponse.buildPaginationMeta>;
@@ -44,7 +44,7 @@ export class TransactionService {
       ...filters,
       page,
       limit,
-    });
+    }, paginated);
 
     const meta = ApiResponse.buildPaginationMeta(total, page, limit);
     return { data, total, meta }
