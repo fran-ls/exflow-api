@@ -1,8 +1,12 @@
 import { YearlyStat, TransactionType } from '../generated/prisma/client';
 import { ICreateYearlyStat, IUpdateYearlyStat, IYearlyStatFilters, IUpdateBalance, IYearlyStat } from '../interfaces/yearlyStat.interface';
 import { YearlyStatRepository } from '../repositories/yearlyStat.repository';
-import { NotFoundError } from '../utils/appError';
+import { NotFoundError, ValidationError } from '../utils/appError';
 import { ApiResponse } from '../utils/apiResponse';
+import { YearlyStatFilters } from '../interfaces/analytic.interface';
+import { AnalyticService } from './analytic.service';
+
+const analyticService = new AnalyticService();
 
 export class YearlyStatService {
   private readonly yearlyStatRepository: YearlyStatRepository;
@@ -101,5 +105,40 @@ export class YearlyStatService {
       incomeCount: isIncome ? stat.incomeCount - 1 : stat.incomeCount,
       expenseCount: !isIncome ? stat.expenseCount - 1 : stat.expenseCount,
     });
+  }
+
+  async changeStats(filters: YearlyStatFilters, action: 'create' | 'update' | 'get' = 'get') {
+    const { userId, year } = filters;
+    if (!userId) throw new ValidationError('User not found');
+
+    const { data: yearlyStats } = await this.getWithFilters({ userId });
+
+    const { years } = await analyticService.getTransactionSummary({ userId });
+
+    for (const d in years) {
+      const t = years[d];
+
+      if (action === 'create' || !yearlyStats.length) await this.create({
+        year: t.year,
+        income: t.income,
+        expense: t.expense,
+        incomeCount: t.incomeCount,
+        expenseCount: t.expenseCount,
+        balance: 0,
+        userId
+      });
+
+      if (action === 'update') {
+        const stat = await this.findOne({ userId, year: t.year });
+        stat && this.update(stat.id, {
+          income: t.income,
+          expense: t.expense,
+          incomeCount: t.incomeCount,
+          expenseCount: t.expenseCount
+        });
+      }
+    }
+
+    return years;
   }
 }

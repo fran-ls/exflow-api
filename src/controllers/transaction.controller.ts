@@ -79,9 +79,8 @@ export class TransactionController {
       if (filters.dateFrom) {
         filters.dateFrom = new Date(filters.dateFrom).toISOString();
       }
-      if (filters.dateTo) {
-        filters.dateTo = new Date(filters.dateTo).toISOString();
-      }
+
+      filters.dateTo = filters.dateTo ? new Date(filters.dateTo).toISOString() : new Date().toISOString();
 
       const { data, meta } = await this.transactionService.getWithFilters(filters);
       ApiResponse.success(res, data, 'Transactions retrieved successfully', 200, meta);

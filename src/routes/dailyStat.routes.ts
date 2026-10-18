@@ -15,7 +15,10 @@ router.get('/', dailyStatController.getAll);
 // GET /api/stats/daily/search
 router.get('/search', dailyStatController.getWithFilters);
 
-// GET /api/stats/dailyuser/:userId
+// GET /api/stats/daily/change
+router.patch('/change', dailyStatController.changeStats);
+
+// GET /api/stats/daily/user/:userId
 router.get('/user/:userId', dailyStatController.getByUserId);
 
 // GET /api/stats/daily/:id

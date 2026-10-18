@@ -79,6 +79,21 @@ export class YearlyStatController {
     }
   }
 
+  // PATCH /stats/yearly/change
+  changeStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const stat = await this.yearlyStatService.changeStats({
+        userId: req.query.userId as string,
+        income: req.query.income as string,
+        expense: req.query.expense as string,
+        year: req.query.year as string
+      });
+      ApiResponse.success(res, stat, 'Yearly stats updated successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // DELETE /stats/yearly/:id
   delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

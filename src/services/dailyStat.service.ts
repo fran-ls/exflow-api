@@ -1,8 +1,12 @@
 import { DailyStat, TransactionType } from '../generated/prisma/client';
 import { ICreateDailyStat, IUpdateDailyStat, IDailyStatFilters, IUpdateBalance, IDailyStat } from '../interfaces/dailyStat.interface';
 import { DailyStatRepository } from '../repositories/dailyStat.repository';
-import { NotFoundError } from '../utils/appError';
+import { NotFoundError, ValidationError } from '../utils/appError';
 import { ApiResponse } from '../utils/apiResponse';
+import { AnalyticService } from './analytic.service';
+import { DailyStatFilters } from '../interfaces/analytic.interface';
+
+const analyticService = new AnalyticService();
 
 export class DailyStatService {
   private readonly dailyStatRepository: DailyStatRepository;
@@ -106,5 +110,41 @@ export class DailyStatService {
       incomeCount: isIncome ? stat.incomeCount - 1 : stat.incomeCount,
       expenseCount: !isIncome ? stat.expenseCount - 1 : stat.expenseCount,
     });
+  }
+
+  async changeStats(filters: DailyStatFilters, action: 'create' | 'update' | 'get' = 'get') {
+    const { userId, date } = filters;
+    if (!userId) throw new ValidationError('User not found');
+
+    const { data: dailyStats } = await this.getWithFilters({ userId });
+
+    const { days } = await analyticService.getTransactionSummary({ userId, date });
+
+    for (const d in days) {
+      const t = days[d];
+
+      if (action === 'create' || !dailyStats.length) await this.create({
+        day: t.date,
+        income: t.income,
+        expense: t.expense,
+        incomeCount: t.incomeCount,
+        expenseCount: t.expenseCount,
+        balance: 0,
+        date: new Date(t.date),
+        userId
+      });
+
+      if (action === 'update') {
+        const stat = await this.findOne({ userId, day: t.date });
+        stat && this.update(stat.id, {
+          income: t.income,
+          expense: t.expense,
+          incomeCount: t.incomeCount,
+          expenseCount: t.expenseCount
+        });
+      }
+    }
+
+    return days;
   }
 }

@@ -79,6 +79,22 @@ export class DailyStatController {
     }
   }
 
+  // PATCH /stats/daily/change
+  changeStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const stat = await this.dailyStatService.changeStats({
+        userId: req.query.userId as string,
+        income: req.query.income as string,
+        expense: req.query.expense as string,
+        date: req.query.date as string,
+        day: req.query.day as string
+      });
+      ApiResponse.success(res, stat, 'Daily stats updated successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // DELETE /stats/daily/:id
   delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

@@ -1,8 +1,12 @@
 import { MonthlyStat, TransactionType } from '../generated/prisma/client';
 import { ICreateMonthlyStat, IUpdateMonthlyStat, IMonthlyStatFilters, IUpdateBalance, IMonthlyStat } from '../interfaces/monthlyStat.interface';
 import { MonthlyStatRepository } from '../repositories/monthlyStat.repository';
-import { NotFoundError } from '../utils/appError';
+import { NotFoundError, ValidationError } from '../utils/appError';
 import { ApiResponse } from '../utils/apiResponse';
+import { MonthlyStatFilters } from '../interfaces/analytic.interface';
+import { AnalyticService } from './analytic.service';
+
+const analyticService = new AnalyticService();
 
 export class MonthlyStatService {
   private readonly monthlyStatRepository: MonthlyStatRepository;
@@ -101,5 +105,40 @@ export class MonthlyStatService {
       incomeCount: isIncome ? stat.incomeCount - 1 : stat.incomeCount,
       expenseCount: !isIncome ? stat.expenseCount - 1 : stat.expenseCount,
     });
+  }
+
+  async changeStats(filters: MonthlyStatFilters, action: 'create' | 'update' | 'get' = 'get') {
+    const { userId, month } = filters;
+    if (!userId) throw new ValidationError('User not found');
+
+    const { data: monthlyStats } = await this.getWithFilters({ userId });
+
+    const { months } = await analyticService.getTransactionSummary({ userId });
+
+    for (const d in months) {
+      const t = months[d];
+
+      if (action === 'create' || !monthlyStats.length) await this.create({
+        month: t.month,
+        income: t.income,
+        expense: t.expense,
+        incomeCount: t.incomeCount,
+        expenseCount: t.expenseCount,
+        balance: 0,
+        userId
+      });
+
+      if (action === 'update') {
+        const stat = await this.findOne({ userId, month: t.month });
+        stat && this.update(stat.id, {
+          income: t.income,
+          expense: t.expense,
+          incomeCount: t.incomeCount,
+          expenseCount: t.expenseCount
+        });
+      }
+    }
+
+    return months;
   }
 }

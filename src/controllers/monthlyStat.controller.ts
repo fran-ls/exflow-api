@@ -79,6 +79,21 @@ export class MonthlyStatController {
     }
   }
 
+  // PATCH /stats/monthly/change
+  changeStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const stat = await this.monthlyStatService.changeStats({
+        userId: req.query.userId as string,
+        income: req.query.income as string,
+        expense: req.query.expense as string,
+        month: req.query.month as string
+      });
+      ApiResponse.success(res, stat, 'Monthly stats updated successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // DELETE /stats/monthly/:id
   delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

@@ -15,7 +15,10 @@ router.get('/', monthlyStatController.getAll);
 // GET /api/stats/monthly/search
 router.get('/search', monthlyStatController.getWithFilters);
 
-// GET /api/stats/monthlyuser/:userId
+// GET /api/stats/monthly/change
+router.patch('/change', monthlyStatController.changeStats);
+
+// GET /api/stats/monthly/user/:userId
 router.get('/user/:userId', monthlyStatController.getByUserId);
 
 // GET /api/stats/monthly/:id
