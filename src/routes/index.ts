@@ -7,11 +7,13 @@ import dailyStatRoutes from './dailyStat.routes';
 import monthlyStatRoutes from './monthlyStat.routes';
 import yearlyStatRoutes from './yearlyStat.routes';
 import dashboardRoutes from './dashboard.routes';
-import { saveTransactionMock } from '../utils/seed/saveTransactionMock';
 import { ApiResponse } from '../utils/apiResponse';
-import { saveWalletMock } from '../utils/seed/saveWalletMock';
+import { SeedMock } from '../utils/seed/seed.mock';
+import { SeedDB } from '../utils/seed/seed.db';
 
 const router = Router();
+const seed = new SeedDB();
+const seedMock = new SeedMock();
 
 router.get('/health', (req: Request, res: Response) => {
   res.json({
@@ -22,26 +24,23 @@ router.get('/health', (req: Request, res: Response) => {
   });
 });
 
-router.get('/seed/wallets', async (req: Request, res: Response, next) => {
-  const userId = req.query.userId as string;
-
+router.get('/seed', async (req: Request, res: Response, next) => {
   try {
-    const data = await saveWalletMock(userId);
-    ApiResponse.success(res, data, 'Wallets saved');
+    const userId = req.query.userId as string;
+    const action = req.query.action as any;
+    const data = await seedMock.execute({ userId, action });
+    ApiResponse.success(res, data);
   } catch (error) {
     next(error);
   }
 });
 
-router.get('/seed/transactions', async (req: Request, res: Response, next) => {
-  const params = {
-    userId: req.query.userId as string,
-    weekday: req.query.weekday as string,
-  } as any;
-
+router.get('/seed/db', async (req: Request, res: Response, next) => {
   try {
-    const data = await saveTransactionMock(params);
-    ApiResponse.success(res, data, 'Transactions saved');
+    const userId = req.query.userId as string;
+    const action = req.query.action as string;
+    const data = await seed.execute(userId, action as any);
+    ApiResponse.success(res, data);
   } catch (error) {
     next(error);
   }
