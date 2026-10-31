@@ -14,13 +14,12 @@ export const ownerOrAdmin = (userIdParam = 'userId') => {
     const requester = req.user!;
     const resourceUserId = (
       req.params[userIdParam] ||
-      req.body[userIdParam] ||
-      req.query[userIdParam]
+      req.query[userIdParam] ||
+      req.body[userIdParam]
     );
 
     if (
       requester.role === Role.ADMIN ||
-      !resourceUserId ||
       requester.sub === resourceUserId
     ) {
       return next();
