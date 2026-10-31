@@ -1,103 +1,129 @@
-# 💰 Wallet API
+# 💰 ExFlow API
 
-REST API con Node.js + TypeScript + Prisma + PostgreSQL.  
-Arquitectura escalable basada en POO: Controller → Service → Repository → Prisma.
+## 📝 Descripción del sistema
+
+Exflow API es el backend de un sistema de finanzas personales. Permite a los usuarios administrar wallets y registrar transactions de tipo ingreso o gasto. Cada transaction se asocia a una wallet y, al crearla, actualizarla o eliminarla, se ajustan los balances correspondientes. El acceso a la API está protegido mediante autenticación con tokens.
+
+---
+
+## 🧰 Tecnologías utilizadas
+
+- **Node.js 22** y **TypeScript** para ejecutar y desarrollar el backend.
+- **Express** para construir la API REST y organizar sus rutas y middlewares.
+- **Prisma ORM** con el adaptador PostgreSQL para el acceso a datos y las migraciones.
+- **PostgreSQL** como base de datos relacional.
+- **JSON Web Tokens** y **bcryptjs** para autenticación y manejo de contraseñas.
+- **express-validator** para validar solicitudes.
+- **Helmet**, **CORS** y **Morgan** para cabeceras HTTP, acceso entre orígenes y registro de solicitudes.
+- **dotenv** para cargar configuración desde variables de entorno.
 
 ---
 
 ## 🏗️ Arquitectura
 
-```
+```text
 src/
-├── config/
-│   └── app.ts               # Express app, middlewares, CORS, Helmet
-├── controllers/
-│   ├── wallet.controller.ts       # HTTP handlers - Wallet
-│   └── transaction.controller.ts  # HTTP handlers - Transaction
-├── services/
-│   ├── wallet.service.ts          # Business logic - Wallet
-│   └── transaction.service.ts     # Business logic + balance sync
-├── repositories/
-│   ├── base.repository.ts         # Abstract base class (POO)
-│   ├── wallet.repository.ts       # Queries Prisma - Wallet
-│   └── transaction.repository.ts  # Queries Prisma - Transaction
-├── middlewares/
-│   ├── wallet.validation.ts       # express-validator rules
-│   ├── transaction.validation.ts
-│   ├── validateRequest.ts         # Validation result handler
-│   └── errorHandler.ts            # Global error handler
-├── interfaces/
-│   ├── wallet.interface.ts
-│   ├── transaction.interface.ts
-│   └── common.interface.ts        # ApiResponse, Pagination
-├── routes/
-│   ├── index.ts
-│   ├── wallet.routes.ts
-│   └── transaction.routes.ts
-├── utils/
-│   ├── ApiResponse.ts             # Response builder
-│   └── AppError.ts               # Custom errors
-├── database/
-│   └── prisma.ts                  # Singleton DB connection
-└── index.ts                       # Bootstrap + graceful shutdown
+├── config/          # Configuración de Express y variables de entorno
+├── controllers/     # Handlers HTTP de Wallet y Transaction
+├── services/        # Lógica de negocio de Wallet y Transaction
+├── repositories/    # Acceso a datos con Prisma
+├── middlewares/     # Autenticación, validación y manejo de errores
+├── interfaces/      # Tipos e interfaces de la API
+├── routes/          # Rutas HTTP
+├── database/        # Cliente Prisma y conexión a PostgreSQL
+├── generated/       # Cliente Prisma generado
+└── index.ts         # Inicio del servidor y cierre ordenado
 ```
 
 ---
 
-## 🚀 Setup
+## 🚀 Requisitos e instalación
+
+- Node.js `22.22.2`
+- PostgreSQL
+- npm
 
 ```bash
-# 1. Clonar e instalar dependencias
 npm install
+```
 
-# 2. Configurar variables de entorno
-cp .env.example .env
-# Editar DATABASE_URL con tu PostgreSQL
+Copia `.env.template` a `.env` y configura, como mínimo, `DATABASE_URL` y los secretos de `JWT_CONFIG`.
 
-# 3. Generar cliente Prisma y correr migraciones
+Genera el cliente de Prisma, aplica las migraciones e inicia el servidor:
+
+```bash
 npm run prisma:generate
 npm run prisma:migrate
-
-# 4. (Opcional) Seed de datos de prueba
-npm run prisma:seed
-
-# 5. Iniciar servidor en modo desarrollo
 npm run dev
 ```
+
+Para compilar y ejecutar la versión compilada:
+
+```bash
+npm run build
+npm start
+```
+
+La API queda disponible en `http://localhost:3000/api`; el puerto se puede cambiar con `PORT`. El endpoint de salud es `GET /api/health`.
+
+---
+
+## 🔐 Autenticación
+
+Todas las rutas de Wallet y Transaction requieren un access token. Inicia sesión en `POST /api/auth/login` y envía el token recibido en el header:
+
+```http
+Authorization: Bearer <accessToken>
+```
+
+Los endpoints de listado global `GET /api/wallets` y `GET /api/transactions` requieren además el rol `ADMIN`.
 
 ---
 
 ## 📡 Endpoints
 
-### Wallets — `/api/wallets`
+Los endpoints siguientes usan el prefijo `/api`.
+
+### Wallets — `/wallets`
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| `GET` | `/api/wallets` | Listar todas las wallets |
-| `GET` | `/api/wallets/search` | Buscar con filtros y paginación |
-| `GET` | `/api/wallets/user/:userId` | Wallets de un usuario |
-| `GET` | `/api/wallets/:id` | Obtener wallet por ID |
-| `POST` | `/api/wallets` | Crear wallet |
-| `PATCH` | `/api/wallets/:id` | Actualizar wallet |
-| `DELETE` | `/api/wallets/:id` | Eliminar wallet (cascade) |
+| `GET` | `/wallets` | Listar todas las wallets (solo ADMIN) |
+| `GET` | `/wallets/search` | Buscar wallets con filtros y paginación |
+| `GET` | `/wallets/count` | Contar wallets de un usuario |
+| `GET` | `/wallets/stats` | Obtener balance, ingresos, gastos y conteos |
+| `GET` | `/wallets/stats/balance` | Obtener el balance total de un usuario |
+| `GET` | `/wallets/user/:userId` | Listar las wallets de un usuario |
+| `GET` | `/wallets/:id` | Obtener una wallet por ID (incluye hasta 10 transactions recientes) |
+| `POST` | `/wallets/new` | Crear una wallet |
+| `PATCH` | `/wallets/:id` | Actualizar una wallet |
+| `DELETE` | `/wallets/:id` | Eliminar una wallet y sus transactions relacionadas |
 
-#### Query params para `/search`:
-| Param | Tipo | Descripción |
-|-------|------|-------------|
-| `userId` | string | Filtrar por usuario |
-| `type` | enum | `CASH, BANK, CREDIT_CARD, SAVINGS, INVESTMENT, OTHER` |
-| `name` | string | Buscar por nombre (contiene) |
+#### Filtros de `GET /wallets/search`
+
+`userId` es obligatorio.
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `userId` | string | ID del usuario |
+| `type` | enum | `CASH`, `BANK`, `CREDIT_CARD`, `SAVINGS`, `INVESTMENT`, `OTHER` |
+| `name` | string | Buscar por nombre (coincidencia parcial, sin distinguir mayúsculas) |
 | `minBalance` | number | Balance mínimo |
 | `maxBalance` | number | Balance máximo |
-| `page` | number | Página (default: 1) |
-| `limit` | number | Items por página (default: 10) |
-| `orderBy` | string | `name, balance, createdAt` |
-| `order` | string | `asc, desc` |
+| `page` | number | Página (por defecto `1`) |
+| `limit` | number | Resultados por página (por defecto `10`) |
+| `orderBy` | string | `name`, `balance`, `incomeCount`, `expenseCount`, `createdAt` |
+| `order` | string | `asc` o `desc` (por defecto `desc`) |
 
-#### Body `POST /api/wallets`:
+`GET /wallets/count` requiere `userId` y acepta `walletId`. `GET /wallets/stats` acepta `userId` y/o `walletId`; `GET /wallets/stats/balance` requiere `userId`.
+
+#### Crear una wallet
+
+`POST /wallets/new`
+
 ```json
 {
-  "name": "Mi Cuenta Banco",
+  "name": "Mi cuenta bancaria",
   "color": "#4CAF50",
   "type": "BANK",
   "initBalance": 1000,
@@ -105,39 +131,51 @@ npm run dev
 }
 ```
 
----
+`color` debe ser un color hexadecimal. El balance inicial de la wallet se establece con `initBalance`.
 
-### Transactions — `/api/transactions`
+### Transactions — `/transactions`
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| `GET` | `/api/transactions` | Listar todas las transacciones |
-| `GET` | `/api/transactions/search` | Buscar con filtros y paginación |
-| `GET` | `/api/transactions/wallet/:walletId` | Transacciones de una wallet |
-| `GET` | `/api/transactions/wallet/:walletId/summary` | Resumen income/expense |
-| `GET` | `/api/transactions/user/:userId` | Transacciones de un usuario |
-| `GET` | `/api/transactions/:id` | Obtener transacción por ID |
-| `POST` | `/api/transactions` | Crear transacción (actualiza balance automáticamente) |
-| `PATCH` | `/api/transactions/:id` | Actualizar (recalcula balance) |
-| `DELETE` | `/api/transactions/:id` | Eliminar (revierte balance) |
+| `GET` | `/transactions` | Listar todas las transactions (solo ADMIN) |
+| `GET` | `/transactions/search` | Buscar transactions con filtros y paginación |
+| `GET` | `/transactions/count` | Contar transactions de un usuario |
+| `GET` | `/transactions/year/summary` | Obtener totales y resumen mensual para un rango de fechas |
+| `GET` | `/transactions/wallet/:walletId` | Listar transactions de una wallet |
+| `GET` | `/transactions/wallet/:walletId/summary` | Obtener totales agrupados por tipo para una wallet |
+| `GET` | `/transactions/user/:userId` | Listar transactions de un usuario |
+| `GET` | `/transactions/:id` | Obtener una transaction por ID |
+| `POST` | `/transactions/new` | Crear una transaction |
+| `PATCH` | `/transactions/:id` | Actualizar una transaction |
+| `DELETE` | `/transactions/:id` | Eliminar una transaction |
 
-#### Query params para `/search`:
-| Param | Tipo | Descripción |
-|-------|------|-------------|
-| `userId` | string | Filtrar por usuario |
+#### Filtros de `GET /transactions/search`
+
+`userId` es obligatorio.
+
+| Parámetro | Tipo | Descripción |
+|-----------|------|-------------|
+| `userId` | string | ID del usuario |
 | `walletId` | string | Filtrar por wallet |
-| `type` | enum | `INCOME, EXPENSE` |
-| `title` | string | Buscar por título (contiene) |
-| `dateFrom` | string | Desde fecha `YYYY-MM-DD` |
-| `dateTo` | string | Hasta fecha `YYYY-MM-DD` |
+| `type` | enum | `INCOME` o `EXPENSE` |
+| `title` | string | Buscar por título |
+| `description` | string | Buscar por descripción |
+| `date` | string | Día exacto en formato `YYYY-MM-DD` |
+| `dateFrom` | string | Inicio del rango de fechas |
+| `dateTo` | string | Fin exclusivo del rango de fechas |
 | `minAmount` | number | Monto mínimo |
 | `maxAmount` | number | Monto máximo |
-| `page` | number | Página |
-| `limit` | number | Límite por página |
-| `orderBy` | string | `date, amount, title, createdAt` |
-| `order` | string | `asc, desc` |
+| `page` | number | Página (por defecto `1`) |
+| `limit` | number | Resultados por página (por defecto `10`) |
+| `orderBy` | string | `date`, `amount`, `title`, `createdAt` |
+| `order` | string | `asc` o `desc` (por defecto `desc`) |
 
-#### Body `POST /api/transactions`:
+`GET /transactions/count` requiere `userId` y acepta `walletId` y `date` (`YYYY-MM-DD`). `GET /transactions/year/summary` recibe `userId`, `dateFrom`, `dateTo` y, opcionalmente, `type`.
+
+#### Crear una transaction
+
+`POST /transactions/new`
+
 ```json
 {
   "title": "Salario",
@@ -151,15 +189,19 @@ npm run dev
 }
 ```
 
+`date` debe usar `YYYY-MM-DD`, `time` debe usar `HH:mm` y `amount` debe ser mayor que cero. No se puede crear un gasto superior al balance disponible de la wallet.
+
 ---
 
-## 📦 Respuesta estándar
+## 📦 Respuesta
+
+Las respuestas exitosas usan el formato siguiente. `meta` se incluye en las respuestas paginadas:
 
 ```json
 {
   "success": true,
   "message": "Wallets retrieved successfully",
-  "data": [...],
+  "data": [],
   "meta": {
     "total": 50,
     "page": 1,
@@ -175,23 +217,28 @@ npm run dev
 
 ## ⚙️ Variables de entorno
 
-```env
-NODE_ENV=development
-PORT=3000
-DATABASE_URL="postgresql://user:password@localhost:5432/wallet_db"
-CORS_ORIGIN=*
-```
+`.env.template` incluye la configuración inicial. Las variables principales son:
+
+| Variable | Descripción |
+|----------|-------------|
+| `NODE_ENV` | Entorno de ejecución |
+| `PORT` | Puerto HTTP (por defecto `3000`) |
+| `DATABASE_URL` | URL de conexión a PostgreSQL |
+| `CORS_ORIGIN` | Origen permitido por CORS |
+| `JWT_CONFIG` | Configuración JSON para secretos y expiración de tokens |
+
+Configura secretos propios en `JWT_CONFIG` y no compartas ni subas el archivo `.env`.
 
 ---
 
-## 🔑 Características clave
+## ✨ Características
 
-- ✅ **CRUD completo** para Wallet y Transaction
-- ✅ **Filtros avanzados** con paginación en ambas entidades
-- ✅ **Balance automático**: crear/editar/eliminar transacciones actualiza `balance`, `income` y `expense` de la wallet
-- ✅ **POO estricta**: Controller → Service → Repository → Prisma
-- ✅ **Validaciones** con express-validator
-- ✅ **Error handling global** con errores Prisma mapeados
-- ✅ **Singleton DB** para conexión eficiente
-- ✅ **Graceful shutdown**
-- ✅ **Helmet + CORS** para seguridad básica
+- ✅ CRUD de Wallet y Transaction.
+- ✅ Búsqueda con filtros y paginación.
+- ✅ Actualización del balance, ingresos, gastos y conteos de la wallet al crear, modificar o eliminar transactions.
+- ✅ POO estricta: Controller → Service → Repository → Prisma.
+- ✅ Validación de datos con `express-validator`.
+- ✅ Autenticación mediante access token Bearer.
+- ✅ Manejo global de errores y respuestas JSON consistentes.
+- ✅ Cliente Prisma con conexión PostgreSQL y cierre ordenado del servidor.
+- ✅ Helmet + CORS para seguridad básica.
