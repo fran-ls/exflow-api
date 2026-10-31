@@ -5,6 +5,7 @@ import { createTransactionValidation, updateTransactionValidation } from '../mid
 import { handleValidationErrors } from '../middlewares/validateRequest';
 import { authenticate } from '../middlewares/authenticate';
 import { authorize } from '../middlewares/authorize';
+import { ownerOrAdmin } from '../middlewares/ownerOrAdmin';
 
 const router = Router();
 const transactionController = new TransactionController();
@@ -15,7 +16,7 @@ router.use(authenticate);
 router.get('/', authorize(Role.ADMIN), transactionController.getAll);
 
 // GET /api/transactions/search
-router.get('/search', transactionController.getWithFilters);
+router.get('/search', ownerOrAdmin('userId'), transactionController.getWithFilters);
 
 // GET /api/transactions/count
 router.get('/count', transactionController.countTransactions);
@@ -38,7 +39,7 @@ router.get('/wallet/:walletId', transactionController.getByWalletId);
 router.get('/wallet/:walletId/summary', transactionController.getSummaryByWallet);
 
 // GET /api/transactions/user/:userId
-router.get('/user/:userId', transactionController.getByUserId);
+router.get('/user/:userId', ownerOrAdmin('userId'), transactionController.getByUserId);
 
 // GET /api/transactions/:id
 router.get('/:id', transactionController.getById);
