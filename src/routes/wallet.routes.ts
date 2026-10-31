@@ -8,6 +8,7 @@ import {
 import { handleValidationErrors } from '../middlewares/validateRequest';
 import { authenticate } from '../middlewares/authenticate';
 import { authorize } from '../middlewares/authorize';
+import { ownerOrAdmin } from '../middlewares/ownerOrAdmin';
 
 const router = Router();
 const walletController = new WalletController();
@@ -18,7 +19,7 @@ router.use(authenticate);
 router.get('/', authorize(Role.ADMIN), walletController.getAll);
 
 // GET /api/wallets/search
-router.get('/search', walletController.getWithFilters);
+router.get('/search', ownerOrAdmin('userId'), walletController.getWithFilters);
 
 // POST /api/wallets/new
 router.post(
@@ -38,7 +39,7 @@ router.get('/stats', walletController.getWalletStats);
 router.get('/stats/balance', walletController.getTotalBalance);
 
 // GET /api/wallets/user/:userId
-router.get('/user/:userId', walletController.getByUserId);
+router.get('/user/:userId', ownerOrAdmin('userId'), walletController.getByUserId);
 
 // GET /api/wallets/:id
 router.get('/:id', walletController.getById);
