@@ -6,6 +6,20 @@ Exflow API es el backend de un sistema de finanzas personales. Permite a los usu
 
 ---
 
+## ✨ Características
+
+- ✅ CRUD de Wallet y Transaction.
+- ✅ Búsqueda con filtros y paginación.
+- ✅ Actualización del balance, ingresos, gastos y conteos de la wallet al crear, modificar o eliminar transactions.
+- ✅ POO estricta: Controller → Service → Repository → Prisma.
+- ✅ Validación de datos con `express-validator`.
+- ✅ Autenticación mediante access token Bearer.
+- ✅ Manejo global de errores y respuestas JSON consistentes.
+- ✅ Cliente Prisma con conexión PostgreSQL y cierre ordenado del servidor.
+- ✅ Helmet + CORS para seguridad básica.
+
+---
+
 ## 🧰 Tecnologías utilizadas
 
 - **Node.js 22** y **TypeScript** para ejecutar y desarrollar el backend.
@@ -230,15 +244,3 @@ Las respuestas exitosas usan el formato siguiente. `meta` se incluye en las resp
 Configura secretos propios en `JWT_CONFIG` y no compartas ni subas el archivo `.env`.
 
 ---
-
-## ✨ Características
-
-- ✅ CRUD de Wallet y Transaction.
-- ✅ Búsqueda con filtros y paginación.
-- ✅ Actualización del balance, ingresos, gastos y conteos de la wallet al crear, modificar o eliminar transactions.
-- ✅ POO estricta: Controller → Service → Repository → Prisma.
-- ✅ Validación de datos con `express-validator`.
-- ✅ Autenticación mediante access token Bearer.
-- ✅ Manejo global de errores y respuestas JSON consistentes.
-- ✅ Cliente Prisma con conexión PostgreSQL y cierre ordenado del servidor.
-- ✅ Helmet + CORS para seguridad básica.
