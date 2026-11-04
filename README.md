@@ -51,6 +51,22 @@ src/
 
 ---
 
+## ⚙️ Variables de entorno
+
+`.env.template` incluye la configuración inicial. Las variables principales son:
+
+| Variable | Descripción |
+|----------|-------------|
+| `NODE_ENV` | Entorno de ejecución |
+| `PORT` | Puerto HTTP (por defecto `3000`) |
+| `DATABASE_URL` | URL de conexión a PostgreSQL |
+| `CORS_ORIGIN` | Origen permitido por CORS |
+| `JWT_CONFIG` | Configuración JSON para secretos y expiración de tokens |
+
+Configura secretos propios en `JWT_CONFIG` y no compartas ni subas el archivo `.env`.
+
+---
+
 ## 🚀 Requisitos e instalación
 
 - Node.js `22.22.2`
@@ -226,21 +242,5 @@ Las respuestas exitosas usan el formato siguiente. `meta` se incluye en las resp
   }
 }
 ```
-
----
-
-## ⚙️ Variables de entorno
-
-`.env.template` incluye la configuración inicial. Las variables principales son:
-
-| Variable | Descripción |
-|----------|-------------|
-| `NODE_ENV` | Entorno de ejecución |
-| `PORT` | Puerto HTTP (por defecto `3000`) |
-| `DATABASE_URL` | URL de conexión a PostgreSQL |
-| `CORS_ORIGIN` | Origen permitido por CORS |
-| `JWT_CONFIG` | Configuración JSON para secretos y expiración de tokens |
-
-Configura secretos propios en `JWT_CONFIG` y no compartas ni subas el archivo `.env`.
 
 ---
